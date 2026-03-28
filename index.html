@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DropShield — Secure File Transfer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #080b10; --surface: #0d1117; --surface2: #131920;
+    --border: rgba(255,255,255,0.07);
+    --accent: #00e5a0; --accent2: #0af; --accent3: #ff4d6d;
+    --amber: #ffb400; --text: #e2e8f0; --muted: #5a7082;
+    --radius: 14px; --glow: 0 0 30px rgba(0,229,160,0.15);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Space Mono', monospace; min-height: 100vh; overflow-x: hidden; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1000;
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+    background-size: 40px 40px; pointer-events: none;
+  }
+
+  /* HEADER */
+  header { padding: 26px 40px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: relative; z-index: 10; }
+  .logo { display: flex; align-items: center; gap: 12px; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; letter-spacing: -0.5px; }
+  .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: grid; place-items: center; font-size: 18px; }
+  .logo span { color: var(--accent); }
+  .status-bar { display: flex; align-items: center; gap: 8px; font-size: 0.72rem; color: var(--muted); }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background .3s; }
+  .status-dot.connected { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+  /* LAYOUT */
+  main { max-width: 1180px; margin: 0 auto; padding: 36px 22px 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; position: relative; z-index: 5; }
+  @media (max-width: 780px) { main { grid-template-columns: 1fr; padding: 20px 14px; } header { padding: 16px; } }
+
+  /* PANELS */
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .panel-header { padding: 18px 22px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .panel-header h2 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem; letter-spacing: 0.6px; text-transform: uppercase; flex: 1; }
+  .panel-badge { font-size: 0.62rem; padding: 3px 9px; border-radius: 99px; background: rgba(255,180,0,0.1); color: var(--amber); letter-spacing: 0.5px; text-transform: uppercase; border: 1px solid rgba(255,180,0,0.2); }
+  .panel-icon { font-size: 15px; opacity: 0.6; }
+  .panel-body { padding: 20px; }
+
+  /* CRYPTO SECTION */
+  .crypto-section {
+    background: linear-gradient(135deg, rgba(255,180,0,0.04), rgba(0,229,160,0.02));
+    border: 1px solid rgba(255,180,0,0.14); border-radius: 12px; padding: 17px;
+    margin-bottom: 16px; position: relative; overflow: hidden;
+  }
+  .crypto-section::after { content: '🔒'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 52px; opacity: 0.04; pointer-events: none; }
+  .crypto-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .crypto-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.8rem; color: var(--amber); display: flex; align-items: center; gap: 7px; }
+  .crypto-toggle-wrap { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; color: var(--muted); cursor: pointer; user-select: none; }
+  .toggle-switch { width: 36px; height: 20px; border-radius: 99px; background: var(--surface2); border: 1px solid var(--border); position: relative; transition: all .25s; cursor: pointer; flex-shrink: 0; }
+  .toggle-switch::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--muted); top: 2px; left: 2px; transition: all .25s; }
+  .toggle-switch.on { background: rgba(255,180,0,0.2); border-color: var(--amber); }
+  .toggle-switch.on::after { background: var(--amber); left: 18px; box-shadow: 0 0 8px rgba(255,180,0,0.5); }
+  .crypto-fields { display: none; }
+  .crypto-fields.show { display: block; }
+
+  /* KEY ROWS */
+  .key-row { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 10px; }
+  .key-row:last-of-type { margin-bottom: 0; }
+  .key-label-col { min-width: 88px; padding-top: 11px; }
+  .key-label { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; display: block; }
+  .key-sublabel { font-size: 0.58rem; color: rgba(90,112,130,0.55); margin-top: 2px; display: block; }
+  .key-input-wrap { flex: 1; display: flex; gap: 5px; }
+  .key-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.76rem; padding: 9px 11px; outline: none; transition: border-color .2s, box-shadow .2s; }
+  .key-input:focus { border-color: var(--amber); box-shadow: 0 0 0 2px rgba(255,180,0,0.07); }
+  .key-input::placeholder { color: var(--muted); opacity: 0.45; }
+  .key-action-btn { padding: 7px 9px; border-radius: 7px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); cursor: pointer; font-size: 13px; transition: all .2s; flex-shrink: 0; height: 38px; }
+  .key-action-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+  .strength-row { padding-left: 96px; margin-top: -4px; margin-bottom: 10px; }
+  .strength-bar-bg { height: 3px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+  .strength-bar-fill { height: 100%; border-radius: 99px; width: 0; transition: width .4s, background .4s; }
+  .strength-text { font-size: 0.6rem; color: var(--muted); margin-top: 4px; }
+
+  .crypto-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .crypto-chip { font-size: 0.6rem; padding: 2px 8px; border-radius: 99px; background: rgba(255,180,0,0.05); border: 1px solid rgba(255,180,0,0.1); color: rgba(255,180,0,0.55); letter-spacing: 0.3px; }
+
+  /* DECRYPT BLOCK */
+  .decrypt-block { background: linear-gradient(135deg, rgba(0,170,255,0.04), rgba(0,229,160,0.02)); border: 1px solid rgba(0,170,255,0.14); border-radius: 12px; padding: 17px; margin-bottom: 16px; }
+  .decrypt-block-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.8rem; color: var(--accent2); display: flex; align-items: center; gap: 7px; margin-bottom: 14px; }
+  .dec-url-row { display: flex; gap: 7px; margin-bottom: 10px; }
+  .dec-url-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.72rem; padding: 9px 11px; outline: none; transition: border-color .2s; }
+  .dec-url-input:focus { border-color: var(--accent2); }
+  .dec-btn-go { padding: 9px 15px; border-radius: 8px; background: var(--accent2); color: #000; border: none; cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.78rem; white-space: nowrap; transition: filter .2s; }
+  .dec-btn-go:hover { filter: brightness(1.15); }
+  .dec-btn-go:disabled { background: var(--surface2); color: var(--muted); cursor: not-allowed; }
+  .dec-key-input:focus { border-color: var(--accent2) !important; }
+  .dec-chips { display: flex; gap: 6px; margin-top: 10px; }
+  .dec-chip { font-size: 0.6rem; padding: 2px 8px; border-radius: 99px; background: rgba(0,170,255,0.05); border: 1px solid rgba(0,170,255,0.1); color: rgba(0,170,255,0.55); }
+
+  /* DROP ZONE */
+  .drop-zone { border: 2px dashed var(--border); border-radius: 12px; padding: 38px 20px; text-align: center; cursor: pointer; transition: all .25s; position: relative; overflow: hidden; }
+  .drop-zone::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(0,229,160,0.05) 0%, transparent 70%); opacity: 0; transition: opacity .3s; }
+  .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); box-shadow: var(--glow); }
+  .drop-zone:hover::before, .drop-zone.drag-over::before { opacity: 1; }
+  .drop-icon { font-size: 36px; margin-bottom: 10px; display: block; filter: grayscale(0.5); }
+  .drop-zone h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; margin-bottom: 5px; }
+  .drop-zone p { color: var(--muted); font-size: 0.74rem; }
+  .drop-zone input { display: none; }
+
+  /* EXPIRY */
+  .expiry-group { margin-top: 15px; }
+  .expiry-group label { display: block; font-size: 0.66rem; color: var(--muted); margin-bottom: 7px; letter-spacing: 1px; text-transform: uppercase; }
+  .expiry-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+  .exp-btn { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.7rem; cursor: pointer; transition: all .2s; }
+  .exp-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .exp-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+
+  /* UPLOAD BTN */
+  .upload-btn { margin-top: 15px; width: 100%; padding: 13px; border-radius: 10px; background: var(--accent); color: #000; border: none; cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.5px; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .upload-btn:hover { background: #00ffb3; transform: translateY(-1px); box-shadow: var(--glow); }
+  .upload-btn:disabled { background: var(--surface2); color: var(--muted); cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* SELECTED FILE */
+  .selected-file { display: none; margin-top: 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px; gap: 11px; align-items: center; }
+  .selected-file.show { display: flex; }
+  .file-icon-big { font-size: 21px; }
+  .file-meta { flex: 1; min-width: 0; }
+  .file-meta .fname { font-size: 0.79rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .file-meta .fsize { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+  .clear-file { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 4px; transition: color .2s; }
+  .clear-file:hover { color: var(--accent3); }
+
+  /* PROGRESS */
+  .progress-wrap { display: none; margin-top: 14px; }
+  .progress-wrap.show { display: block; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--muted); margin-bottom: 7px; }
+  .progress-bar-bg { height: 6px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 99px; width: 0%; transition: width .3s; box-shadow: 0 0 10px rgba(0,229,160,0.5); }
+  .progress-bar-fill.enc-mode { background: linear-gradient(90deg, var(--amber), #ff9500); box-shadow: 0 0 10px rgba(255,180,0,0.5); }
+  .progress-status { margin-top: 7px; font-size: 0.68rem; color: var(--muted); font-style: italic; }
+
+  /* SUCCESS CARD */
+  .success-card { display: none; margin-top: 16px; background: rgba(0,229,160,0.04); border: 1px solid rgba(0,229,160,0.2); border-radius: 12px; padding: 17px; animation: fadeIn .4s ease; }
+  .success-card.show { display: block; }
+  .success-title { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 8px; margin-bottom: 13px; font-size: 0.88rem; }
+  .share-url { display: flex; gap: 7px; margin-bottom: 9px; }
+  .share-url input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.7rem; padding: 8px 10px; outline: none; }
+  .copy-btn { padding: 8px 12px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); cursor: pointer; font-size: 13px; transition: all .2s; flex-shrink: 0; }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-btn.copied { color: var(--accent); border-color: var(--accent); }
+  .token-row { display: flex; gap: 7px; align-items: center; background: var(--surface2); border-radius: 8px; padding: 8px 11px; margin-bottom: 9px; border: 1px solid var(--border); }
+  .token-label { font-size: 0.62rem; color: var(--muted); flex-shrink: 0; letter-spacing: 0.5px; text-transform: uppercase; }
+  .token-val { flex: 1; font-size: 0.68rem; color: #888; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .toggle-token { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 13px; flex-shrink: 0; }
+
+  /* ENC KEY REMINDER */
+  .enc-key-reminder { display: none; background: rgba(255,180,0,0.05); border: 1px solid rgba(255,180,0,0.18); border-radius: 9px; padding: 12px 13px; margin-bottom: 9px; font-size: 0.7rem; }
+  .enc-key-reminder.show { display: block; }
+  .enc-reminder-title { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--amber); margin-bottom: 4px; }
+  .enc-reminder-sub { font-size: 0.64rem; color: rgba(255,180,0,0.6); margin-bottom: 8px; }
+  .enc-key-copy-row { display: flex; gap: 6px; }
+  .enc-key-copy-val { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.65rem; padding: 7px 9px; outline: none; }
+  .salt-note { font-size: 0.6rem; color: rgba(255,180,0,0.45); margin-top: 5px; }
+
+  .expiry-info { font-size: 0.68rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+
+  /* FILE LIST */
+  .file-list { display: flex; flex-direction: column; gap: 8px; }
+  .file-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; display: flex; align-items: center; gap: 12px; transition: all .2s; animation: slideIn .3s ease; }
+  .file-card:hover { border-color: rgba(255,255,255,0.12); }
+  .fc-icon { font-size: 21px; flex-shrink: 0; }
+  .fc-info { flex: 1; min-width: 0; }
+  .fc-name { font-size: 0.78rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+  .fc-meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.63rem; color: var(--muted); align-items: center; }
+  .fc-badge { padding: 2px 7px; border-radius: 99px; background: rgba(0,229,160,0.07); color: var(--accent); font-size: 0.6rem; }
+  .fc-badge.expiring { background: rgba(255,180,0,0.07); color: var(--amber); }
+  .fc-badge.enc { background: rgba(255,180,0,0.06); color: var(--amber); border: 1px solid rgba(255,180,0,0.14); }
+  .fc-actions { display: flex; gap: 5px; flex-shrink: 0; }
+  .fc-btn { width: 29px; height: 29px; border-radius: 7px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-size: 13px; display: grid; place-items: center; transition: all .2s; }
+  .fc-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .fc-btn.del:hover { border-color: var(--accent3); color: var(--accent3); }
+  .fc-btn.decry:hover { border-color: var(--amber); color: var(--amber); }
+
+  .empty-state { text-align: center; padding: 40px 18px; color: var(--muted); }
+  .empty-state .es-icon { font-size: 34px; margin-bottom: 10px; display: block; opacity: 0.32; }
+  .empty-state p { font-size: 0.76rem; }
+
+  /* TOAST */
+  #toast-container { position: fixed; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 9999; }
+  .toast { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 11px 15px; font-size: 0.74rem; display: flex; align-items: center; gap: 8px; min-width: 230px; max-width: 320px; animation: slideToast .3s ease; box-shadow: 0 8px 26px rgba(0,0,0,0.5); }
+  .toast.success { border-color: rgba(0,229,160,0.28); }
+  .toast.error   { border-color: rgba(255,77,109,0.28); }
+  .toast.info    { border-color: rgba(0,170,255,0.28); }
+  .toast.warn    { border-color: rgba(255,180,0,0.28); }
+
+  /* MODALS */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 500; place-items: center; backdrop-filter: blur(4px); }
+  .modal-overlay.open { display: grid; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; width: 92%; max-width: 420px; animation: fadeIn .2s ease; }
+  .modal h3 { font-family: 'Syne', sans-serif; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 1rem; }
+  .modal p { font-size: 0.78rem; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
+  .modal-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.78rem; padding: 10px 12px; outline: none; margin-bottom: 10px; transition: border-color .2s; }
+  .modal-input:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+  .btn-cancel { padding: 9px 15px; border-radius: 8px; background: transparent; border: 1px solid var(--border); color: var(--muted); cursor: pointer; font-family: 'Space Mono', monospace; font-size: 0.76rem; transition: all .2s; }
+  .btn-cancel:hover { border-color: var(--accent3); color: var(--accent3); }
+  .btn-del { padding: 9px 15px; border-radius: 8px; background: var(--accent3); border: none; color: #fff; cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.78rem; transition: filter .2s; }
+  .btn-del:hover { filter: brightness(1.1); }
+  .btn-dec { padding: 9px 15px; border-radius: 8px; background: var(--amber); border: none; color: #000; cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.78rem; transition: filter .2s; }
+  .btn-dec:hover { filter: brightness(1.1); }
+  .btn-dec:disabled, .btn-del:disabled { background: var(--surface2); color: var(--muted); cursor: not-allowed; filter: none; }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn   { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes slideIn  { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:translateX(0); } }
+  @keyframes slideToast { from { opacity:0; transform:translateX(20px); } to { opacity:1; transform:translateX(0); } }
+  .spinning { animation: spin 1s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  footer { text-align: center; padding: 20px; font-size: 0.66rem; color: var(--muted); border-top: 1px solid var(--border); position: relative; z-index: 5; }
+  footer .g { color: var(--accent); } footer .a { color: var(--amber); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><div class="logo-icon">🛡</div>Drop<span>Shield</span></div>
+  <div class="status-bar">
+    <div class="status-dot" id="ws-dot"></div>
+    <span id="ws-label">Connecting…</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ═══ LEFT: UPLOAD ═══ -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-icon">⬆</span>
+      <h2>Upload File</h2>
+      <span class="panel-badge" id="enc-badge" style="display:none">🔒 AES-256-GCM</span>
+    </div>
+    <div class="panel-body">
+
+      <!-- ENCRYPTION FORM -->
+      <div class="crypto-section">
+        <div class="crypto-header">
+          <div class="crypto-title">🔐 Client-Side Encryption</div>
+          <div class="crypto-toggle-wrap" id="enc-toggle-wrap">
+            <span id="enc-toggle-lbl">Off</span>
+            <div class="toggle-switch" id="enc-toggle"></div>
+          </div>
+        </div>
+
+        <div class="crypto-fields" id="crypto-fields">
+
+          <div class="key-row">
+            <div class="key-label-col">
+              <span class="key-label">Passphrase</span>
+              <span class="key-sublabel">Derives AES key</span>
+            </div>
+            <div class="key-input-wrap">
+              <input class="key-input" type="password" id="enc-pass" placeholder="Your secret passphrase…" autocomplete="off" />
+              <button class="key-action-btn" id="btn-show-pass" title="Show / hide">👁</button>
+              <button class="key-action-btn" id="btn-gen-pass" title="Generate random passphrase">⚡</button>
+            </div>
+          </div>
+          <div class="strength-row">
+            <div class="strength-bar-bg"><div class="strength-bar-fill" id="str-fill"></div></div>
+            <div class="strength-text" id="str-text">Enter a passphrase</div>
+          </div>
+
+          <div class="key-row">
+            <div class="key-label-col">
+              <span class="key-label">Salt</span>
+              <span class="key-sublabel">Optional extra factor</span>
+            </div>
+            <div class="key-input-wrap">
+              <input class="key-input" type="text" id="enc-salt" placeholder="Optional custom salt (leave blank to auto-generate)" autocomplete="off" />
+              <button class="key-action-btn" id="btn-gen-salt" title="Generate random salt">⚡</button>
+            </div>
+          </div>
+
+       
+        </div>
+      </div><!-- /crypto-section -->
+
+      <!-- DROP ZONE -->
+      <div class="drop-zone" id="drop-zone">
+        <span class="drop-icon">📂</span>
+        <h3>Drop your file here</h3>
+        <p>or click to browse &nbsp;·&nbsp; max 2 GB</p>
+        <input type="file" id="file-input" />
+      </div>
+
+      <div class="selected-file" id="selected-file">
+        <span class="file-icon-big" id="sel-icon">📄</span>
+        <div class="file-meta">
+          <div class="fname" id="sel-name">—</div>
+          <div class="fsize" id="sel-size">—</div>
+        </div>
+        <button class="clear-file" id="clear-file">✕</button>
+      </div>
+
+      <div class="expiry-group">
+        <label>Link Expires After</label>
+        <div class="expiry-buttons" id="expiry-btns">
+          <button class="exp-btn" data-ms="3600000">1h</button>
+          <button class="exp-btn" data-ms="86400000">1d</button>
+          <button class="exp-btn active" data-ms="604800000">7d</button>
+          <button class="exp-btn" data-ms="2592000000">30d</button>
+        </div>
+      </div>
+
+      <div class="progress-wrap" id="up-prog-wrap">
+        <div class="progress-label"><span id="up-prog-lbl">Processing…</span><span id="up-prog-pct">0%</span></div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="up-prog-fill"></div></div>
+        <div class="progress-status" id="up-prog-status"></div>
+      </div>
+
+      <button class="upload-btn" id="upload-btn" disabled><span>Select a file first</span></button>
+
+      <!-- SUCCESS CARD -->
+      <div class="success-card" id="success-card">
+        <div class="success-title">✔ Uploaded Successfully</div>
+        <div class="share-url">
+          <input type="text" id="share-url-input" readonly />
+          <button class="copy-btn" id="copy-url-btn">⧉</button>
+        </div>
+        <div class="token-row">
+          <span class="token-label">Owner Token</span>
+          <span class="token-val" id="token-val">••••••••••</span>
+          <button class="toggle-token" id="toggle-token">👁</button>
+          <button class="copy-btn" id="copy-token-btn">⧉</button>
+        </div>
+        <div class="enc-key-reminder" id="enc-key-reminder">
+          <div class="enc-reminder-title">🔑 Save your decryption passphrase!</div>
+          <div class="enc-reminder-sub">Without it the file cannot be recovered. Your key never leaves this browser.</div>
+          <div class="enc-key-copy-row">
+            <input class="enc-key-copy-val" type="text" id="enc-key-display" readonly />
+            <button class="copy-btn" id="copy-enc-key-btn">⧉</button>
+          </div>
+          <div class="salt-note" id="salt-display-note"></div>
+        </div>
+        <div class="expiry-info" id="success-expiry">⏱ Expires —</div>
+      </div>
+
+    </div>
+  </div><!-- /upload panel -->
+
+  <!-- ═══ RIGHT COL ═══ -->
+  <div style="display:flex;flex-direction:column;gap:20px;">
+
+    <!-- DECRYPT PANEL -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-icon">🔓</span>
+        <h2>Decrypt &amp; Download</h2>
+      </div>
+      <div class="panel-body">
+        <div class="decrypt-block">
+          <div class="decrypt-block-title">🔑 Paste URL + enter passphrase</div>
+
+          <div class="dec-url-row">
+            <input class="dec-url-input" type="text" id="dec-url" placeholder="File URL (https://…/file/…)" />
+            <button class="dec-btn-go" id="dec-go-btn">⬇ Decrypt</button>
+          </div>
+
+          <div class="key-row">
+            <div class="key-label-col"><span class="key-label">Passphrase</span></div>
+            <div class="key-input-wrap">
+              <input class="key-input dec-key-input" type="password" id="dec-pass" placeholder="Decryption passphrase…" autocomplete="off" />
+              <button class="key-action-btn" id="btn-dec-show">👁</button>
+            </div>
+          </div>
+
+          <div class="key-row" style="margin-top:6px">
+            <div class="key-label-col"><span class="key-label">Salt</span></div>
+            <div class="key-input-wrap">
+              <input class="key-input dec-key-input" type="text" id="dec-salt" placeholder="Salt used at upload (if any)" autocomplete="off" />
+            </div>
+          </div>
+
+          <div class="dec-chips">
+            <span class="dec-chip">Decrypted locally</span>
+            <span class="dec-chip">Key never sent to server</span>
+          </div>
+        </div>
+
+        <div class="progress-wrap" id="dec-prog-wrap">
+          <div class="progress-label"><span id="dec-prog-lbl">Downloading…</span><span id="dec-prog-pct">0%</span></div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="dec-prog-fill" style="background:linear-gradient(90deg,var(--amber),#ff9500);box-shadow:0 0 10px rgba(255,180,0,0.4)"></div></div>
+          <div class="progress-status" id="dec-prog-status"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILE LIST PANEL -->
+    <div class="panel" style="flex:1">
+      <div class="panel-header">
+        <span class="panel-icon">📁</span>
+        <h2>Active Files</h2>
+      </div>
+      <div class="panel-body" style="padding:13px;">
+        <div class="file-list" id="file-list">
+          <div class="empty-state"><span class="es-icon">🌐</span><p>No active files yet.<br/>Upload something to see it here.</p></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /right col -->
+</main>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="del-modal">
+  <div class="modal">
+    <h3>🗑 Delete File</h3>
+    <p>Paste your <strong>Owner Token</strong> to permanently delete this file from Cloudinary and MongoDB.</p>
+    <input class="modal-input" type="password" id="del-token-inp" placeholder="Owner token…" />
+    <div class="modal-actions">
+      <button class="btn-cancel" id="del-cancel">Cancel</button>
+      <button class="btn-del" id="del-confirm">Delete Forever</button>
+    </div>
+  </div>
+</div>
+
+<!-- DECRYPT-FROM-LIST MODAL -->
+<div class="modal-overlay" id="dm-modal">
+  <div class="modal">
+    <h3>🔓 Decrypt File</h3>
+    <p>Enter the passphrase (and salt if used during upload) to download and decrypt this file in your browser.</p>
+    <input class="modal-input" type="password" id="dm-pass" placeholder="Decryption passphrase…" />
+    <input class="modal-input" type="text"     id="dm-salt" placeholder="Salt (leave blank if not used)" />
+    <div class="modal-actions">
+      <button class="btn-cancel" id="dm-cancel">Cancel</button>
+      <button class="btn-dec"    id="dm-confirm">🔓 Decrypt &amp; Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<footer>
+  DropShield &nbsp;·&nbsp; <span class="g">Chunked</span> Upload &nbsp;·&nbsp;
+  <span class="a">AES-256-GCM</span> Client Encryption &nbsp;·&nbsp;
+  <span class="g">Cloudinary</span> + <span class="g">MongoDB</span>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════════════
+const API    = 'https://file-share-unique.onrender.com';
+const WS_URL = API.replace(/^https/, 'wss').replace(/^http/, 'ws');
+
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+let selectedFile    = null;
+let expiryMs        = 604800000;
+let encEnabled      = false;
+let ownerTokenRaw   = null;
+let tokenVis        = false;
+let passVis         = false;
+let decPassVis      = false;
+let delTargetId     = null;
+let dmTargetId      = null;
+let dmTargetName    = null;
+let wsConn          = null;
+const activeFiles   = new Map();
+
+// ══════════════════════════════════════════════════════════════
+//  WEB CRYPTO — AES-256-GCM + PBKDF2-SHA256
+//  Blob layout: [6B magic][16B salt][12B IV][ciphertext]
+// ══════════════════════════════════════════════════════════════
+const MAGIC = new Uint8Array([0x44,0x53,0x45,0x4e,0x43,0x31]); // "DSENC1"
+
+async function deriveKey(passphrase, saltBuf) {
+  const enc    = new TextEncoder();
+  const keyMat = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt:saltBuf, iterations:100000, hash:'SHA-256' },
+    keyMat, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']
+  );
+}
+
+async function encryptFile(file, passphrase, customSalt) {
+  const raw     = await file.arrayBuffer();
+  const enc     = new TextEncoder();
+  const saltBuf = customSalt ? enc.encode(customSalt).slice(0,16).buffer
+                             : crypto.getRandomValues(new Uint8Array(16)).buffer;
+  const saltArr = new Uint8Array(saltBuf);
+  // Pad/trim to exactly 16 bytes
+  const salt16  = new Uint8Array(16);
+  salt16.set(saltArr.slice(0,16));
+
+  const key  = await deriveKey(passphrase, salt16);
+  const iv   = crypto.getRandomValues(new Uint8Array(12));
+  const ciph = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, raw);
+
+  const out = new Uint8Array(6 + 16 + 12 + ciph.byteLength);
+  let p = 0;
+  out.set(MAGIC,  p); p += 6;
+  out.set(salt16, p); p += 16;
+  out.set(iv,     p); p += 12;
+  out.set(new Uint8Array(ciph), p);
+
+  return new Blob([out], { type:'application/octet-stream' });
+}
+
+async function decryptBuffer(buf, passphrase, customSalt) {
+  const bytes = new Uint8Array(buf);
+  if (bytes.length < 34 || !MAGIC.every((b,i) => b === bytes[i]))
+    throw new Error('Not a DropShield-encrypted file — check passphrase or file URL');
+
+  const storedSalt = bytes.slice(6, 22);
+  const iv         = bytes.slice(22, 34);
+  const ciph       = bytes.slice(34);
+
+  let saltBuf;
+  if (customSalt) {
+    const enc = new TextEncoder();
+    const s   = enc.encode(customSalt);
+    saltBuf   = new Uint8Array(16);
+    saltBuf.set(s.slice(0, 16));
+  } else {
+    saltBuf = storedSalt;
+  }
+
+  const key = await deriveKey(passphrase, saltBuf);
+  try {
+    return await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, ciph);
+  } catch {
+    throw new Error('Wrong passphrase or salt — decryption failed');
+  }
+}
+
+function saveBlob(buffer, filename) {
+  const url = URL.createObjectURL(new Blob([buffer]));
+  const a   = Object.assign(document.createElement('a'), { href:url, download:filename });
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1200);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════════════════
+const fmtSize = b => b<1024?b+' B':b<1024**2?(b/1024).toFixed(1)+' KB':b<1024**3?(b/1024**2).toFixed(1)+' MB':(b/1024**3).toFixed(2)+' GB';
+function fmtExpiry(ms) {
+  const d=ms-Date.now(); if(d<=0) return 'Expired';
+  const D=Math.floor(d/86400000),H=Math.floor((d%86400000)/3600000),M=Math.floor((d%3600000)/60000);
+  return D>0?`${D}d ${H}h`:H>0?`${H}h ${M}m`:`${M}m`;
+}
+function fileEmoji(n) {
+  const e=(n.split('.').pop()||'').toLowerCase();
+  return ({pdf:'📄',zip:'🗜',tar:'🗜',gz:'🗜',rar:'🗜',jpg:'🖼',jpeg:'🖼',png:'🖼',gif:'🖼',webp:'🖼',svg:'🖼',mp4:'🎬',mov:'🎬',avi:'🎬',mkv:'🎬',mp3:'🎵',wav:'🎵',flac:'🎵',js:'💻',ts:'💻',py:'💻',html:'💻',css:'💻',json:'💻',doc:'📝',docx:'📝',txt:'📝',md:'📝',xls:'📊',xlsx:'📊',csv:'📊',exe:'⚙',dmg:'⚙',apk:'⚙',dsenc:'🔒'})[e]||'📦';
+}
+function toast(msg, type='info', icon='ℹ') {
+  const el=document.createElement('div'); el.className=`toast ${type}`;
+  el.innerHTML=`<span>${icon}</span><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>el.remove(),4500);
+}
+function clip(t,lbl='Copied') { navigator.clipboard.writeText(t).then(()=>toast(lbl,'success','✔')); }
+function rndStr(n=20) {
+  const c='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+  return Array.from(crypto.getRandomValues(new Uint8Array(n))).map(b=>c[b%c.length]).join('');
+}
+function cleanName(n) { return n.endsWith('.dsenc') ? n.slice(0,-6) : n; }
+
+// ══════════════════════════════════════════════════════════════
+//  PASSPHRASE STRENGTH
+// ══════════════════════════════════════════════════════════════
+function strength(p) {
+  let s=0; if(p.length>=8)s++; if(p.length>=14)s++; if(/[A-Z]/.test(p))s++; if(/[0-9]/.test(p))s++; if(/[^A-Za-z0-9]/.test(p))s++; return s;
+}
+function updateStrength(p) {
+  const fill=document.getElementById('str-fill'), text=document.getElementById('str-text');
+  if(!p){ fill.style.width='0'; text.textContent='Enter a passphrase'; fill.style.background=''; return; }
+  const s=strength(p);
+  const [clr,lbl]=[['#ff4d6d','Weak'],['#ff7b00','Fair'],['#ffb400','Good'],['#7ede8e','Strong'],['#00e5a0','Very Strong']][Math.min(s,5)-1]||['#ff4d6d','Weak'];
+  fill.style.width=(s/5*100)+'%'; fill.style.background=clr;
+  text.textContent=lbl; text.style.color=clr;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ENCRYPTION TOGGLE
+// ══════════════════════════════════════════════════════════════
+document.getElementById('enc-toggle').addEventListener('click', () => {
+  encEnabled = !encEnabled;
+  document.getElementById('enc-toggle').classList.toggle('on', encEnabled);
+  document.getElementById('crypto-fields').classList.toggle('show', encEnabled);
+  document.getElementById('enc-badge').style.display = encEnabled ? '' : 'none';
+  document.getElementById('enc-toggle-lbl').textContent = encEnabled ? 'On' : 'Off';
+  if (selectedFile) updateUploadBtn();
+});
+
+// PASS FIELD
+document.getElementById('enc-pass').addEventListener('input', e => updateStrength(e.target.value));
+document.getElementById('btn-show-pass').addEventListener('click', () => {
+  passVis = !passVis;
+  document.getElementById('enc-pass').type = passVis ? 'text' : 'password';
+  document.getElementById('btn-show-pass').textContent = passVis ? '🙈' : '👁';
+});
+document.getElementById('btn-gen-pass').addEventListener('click', () => {
+  const p = rndStr(22);
+  document.getElementById('enc-pass').value = p;
+  document.getElementById('enc-pass').type = 'text'; passVis = true;
+  document.getElementById('btn-show-pass').textContent = '🙈';
+  updateStrength(p);
+  clip(p, 'Random passphrase generated & copied!');
+});
+document.getElementById('btn-gen-salt').addEventListener('click', () => {
+  document.getElementById('enc-salt').value = rndStr(14);
+  toast('Random salt generated', 'info', '⚡');
+});
+
+// DECRYPT PANEL PASS TOGGLE
+document.getElementById('btn-dec-show').addEventListener('click', () => {
+  decPassVis = !decPassVis;
+  document.getElementById('dec-pass').type = decPassVis ? 'text' : 'password';
+  document.getElementById('btn-dec-show').textContent = decPassVis ? '🙈' : '👁';
+});
+
+// ══════════════════════════════════════════════════════════════
+//  EXPIRY
+// ══════════════════════════════════════════════════════════════
+document.getElementById('expiry-btns').addEventListener('click', e => {
+  const b = e.target.closest('.exp-btn'); if (!b) return;
+  document.querySelectorAll('.exp-btn').forEach(x => x.classList.remove('active'));
+  b.classList.add('active'); expiryMs = parseInt(b.dataset.ms);
+});
+
+// ══════════════════════════════════════════════════════════════
+//  DROP ZONE
+// ══════════════════════════════════════════════════════════════
+const dz = document.getElementById('drop-zone');
+const fi = document.getElementById('file-input');
+dz.addEventListener('click', () => fi.click());
+fi.addEventListener('change', () => { if(fi.files[0]) setFile(fi.files[0]); });
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+
+function setFile(f) {
+  if (f.size > 2*1024**3) { toast('File too large (max 2 GB)', 'error', '✕'); return; }
+  selectedFile = f;
+  document.getElementById('sel-icon').textContent = fileEmoji(f.name);
+  document.getElementById('sel-name').textContent = f.name;
+  document.getElementById('sel-size').textContent = fmtSize(f.size);
+  document.getElementById('selected-file').classList.add('show');
+  document.getElementById('success-card').classList.remove('show');
+  document.getElementById('up-prog-wrap').classList.remove('show');
+  updateUploadBtn();
+}
+function updateUploadBtn() {
+  const btn = document.getElementById('upload-btn');
+  btn.disabled = false;
+  btn.innerHTML = encEnabled ? '<span>🔒 Encrypt &amp; Upload</span>' : '<span>Upload File</span>';
+}
+
+document.getElementById('clear-file').addEventListener('click', () => {
+  selectedFile = null; fi.value = '';
+  document.getElementById('selected-file').classList.remove('show');
+  const btn = document.getElementById('upload-btn');
+  btn.disabled = true; btn.innerHTML = '<span>Select a file first</span>';
+});
+
+// ══════════════════════════════════════════════════════════════
+//  UPLOAD
+// ══════════════════════════════════════════════════════════════
+document.getElementById('upload-btn').addEventListener('click', async () => {
+  if (!selectedFile) return;
+  if (encEnabled) {
+    const p = document.getElementById('enc-pass').value.trim();
+    if (!p) { toast('Enter a passphrase to encrypt', 'warn', '⚠'); return; }
+    if (strength(p) < 2) { toast('Passphrase too weak — make it longer', 'warn', '⚠'); return; }
+  }
+  await doUpload(selectedFile);
+});
+
+function setUpProg(pct, lbl, status, encMode=false) {
+  const fill = document.getElementById('up-prog-fill');
+  fill.style.width = pct+'%';
+  fill.className = 'progress-bar-fill' + (encMode ? ' enc-mode' : '');
+  document.getElementById('up-prog-pct').textContent = pct+'%';
+  document.getElementById('up-prog-lbl').textContent = lbl;
+  document.getElementById('up-prog-status').textContent = status;
+}
+
+async function doUpload(file) {
+  const btn = document.getElementById('upload-btn');
+  const pw  = document.getElementById('up-prog-wrap');
+  btn.disabled = true; pw.classList.add('show');
+  document.getElementById('success-card').classList.remove('show');
+  setUpProg(0, 'Starting…', 'Initializing');
+
+  let uploadFile = file, uploadName = file.name;
+
+  try {
+    /* ── ENCRYPT ── */
+    if (encEnabled) {
+      const pass = document.getElementById('enc-pass').value.trim();
+      const salt = document.getElementById('enc-salt').value.trim();
+      btn.innerHTML = '<span class="spinning">↻</span><span>Encrypting…</span>';
+      setUpProg(0, 'Encrypting…', 'AES-256-GCM in progress…', true);
+      const blob = await encryptFile(file, pass, salt);
+      uploadFile = new File([blob], file.name+'.dsenc', { type:'application/octet-stream' });
+      uploadName = uploadFile.name;
+      setUpProg(14, 'Uploading…', 'Encryption done, uploading chunks…');
+    }
+    btn.innerHTML = '<span class="spinning">↻</span><span>Uploading…</span>';
+
+    /* ── INIT ── */
+    const ir = await fetch(`${API}/upload/init`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ fileName:uploadName, fileSize:uploadFile.size, mimeType:'application/octet-stream', meta:{ originalName:uploadName, encrypted:encEnabled } })
+    });
+    if (!ir.ok) throw new Error((await ir.json()).error||'Init failed');
+    const { uploadId, chunkSize, totalChunks } = await ir.json();
+
+    /* ── CHUNKS ── */
+    for (let i=0; i<totalChunks; i++) {
+      const start = i*chunkSize;
+      const fd = new FormData();
+      fd.append('chunk', uploadFile.slice(start, start+chunkSize), uploadName);
+      const cr = await fetch(`${API}/upload/chunk`, { method:'POST', headers:{'x-upload-id':uploadId,'x-chunk-index':i}, body:fd });
+      if (!cr.ok) throw new Error(`Chunk ${i} failed`);
+      const base = encEnabled?14:0;
+      setUpProg(base+Math.round(((i+1)/totalChunks)*(90-base)), 'Uploading…', `Chunk ${i+1} / ${totalChunks}`);
+    }
+
+    /* ── FINALIZE ── */
+    setUpProg(92, 'Finalizing…', 'Assembling on server…');
+    const fr = await fetch(`${API}/upload/finalize`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({uploadId}) });
+    if (!fr.ok) throw new Error((await fr.json()).error||'Finalize failed');
+    const result = await fr.json();
+
+    setUpProg(100, 'Complete', 'Upload successful!');
+    showSuccess(result);
+    toast(encEnabled?'🔒 Encrypted & uploaded!':'File uploaded!','success','✔');
+
+  } catch(err) { toast(err.message,'error','✕'); console.error(err); pw.classList.remove('show'); }
+  finally { btn.disabled=false; btn.innerHTML='<span>Upload Another</span>'; }
+}
+
+function showSuccess(result) {
+  ownerTokenRaw = result.ownerToken;
+  document.getElementById('share-url-input').value = result.url;
+  document.getElementById('token-val').textContent = '••••••••••'; tokenVis=false;
+  document.getElementById('success-expiry').textContent = `⏱ Expires in ${fmtExpiry(result.expiresAt)}`;
+
+  const rem = document.getElementById('enc-key-reminder');
+  if (encEnabled) {
+    rem.classList.add('show');
+    document.getElementById('enc-key-display').value = document.getElementById('enc-pass').value;
+    const s = document.getElementById('enc-salt').value.trim();
+    document.getElementById('salt-display-note').textContent = s ? `Salt used: ${s}` : 'No custom salt — auto-generated salt embedded in file';
+  } else { rem.classList.remove('show'); }
+
+  document.getElementById('success-card').classList.add('show');
+}
+
+/* Copy buttons */
+document.getElementById('copy-url-btn').addEventListener('click', function() {
+  clip(document.getElementById('share-url-input').value,'Link copied!');
+  this.classList.add('copied'); this.textContent='✔';
+  setTimeout(()=>{ this.classList.remove('copied'); this.textContent='⧉'; },2000);
+});
+document.getElementById('toggle-token').addEventListener('click', () => {
+  tokenVis=!tokenVis;
+  document.getElementById('token-val').textContent = tokenVis?ownerTokenRaw:'••••••••••';
+  document.getElementById('toggle-token').textContent = tokenVis?'🙈':'👁';
+});
+document.getElementById('copy-token-btn').addEventListener('click', () => { if(ownerTokenRaw) clip(ownerTokenRaw,'Owner token copied!'); });
+document.getElementById('copy-enc-key-btn').addEventListener('click', () => clip(document.getElementById('enc-key-display').value,'Passphrase copied!'));
+
+// ══════════════════════════════════════════════════════════════
+//  DECRYPT PANEL
+// ══════════════════════════════════════════════════════════════
+document.getElementById('dec-go-btn').addEventListener('click', async () => {
+  const url  = document.getElementById('dec-url').value.trim();
+  const pass = document.getElementById('dec-pass').value.trim();
+  const salt = document.getElementById('dec-salt').value.trim();
+  if (!url)  { toast('Enter a file URL','warn','⚠'); return; }
+  if (!pass) { toast('Enter the decryption passphrase','warn','⚠'); return; }
+  await fetchDecryptSave(url, pass, salt, null, 'dec');
+});
+
+async function fetchDecryptSave(url, pass, salt, filename, progId='dec') {
+  const wrap   = document.getElementById(`${progId}-prog-wrap`);
+  const fill   = document.getElementById(`${progId}-prog-fill`);
+  const label  = document.getElementById(`${progId}-prog-lbl`);
+  const pct    = document.getElementById(`${progId}-prog-pct`);
+  const status = document.getElementById(`${progId}-prog-status`);
+  const decBtn = document.getElementById('dec-go-btn');
+
+  wrap.classList.add('show');
+  if(decBtn) decBtn.disabled=true;
+
+  const setP=(p,l,s)=>{ fill.style.width=p+'%'; pct.textContent=p+'%'; label.textContent=l; status.textContent=s; };
+
+  try {
+    setP(8,'Downloading…','Fetching encrypted file from server…');
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Download failed: HTTP '+res.status);
+
+    const total  = parseInt(res.headers.get('content-length')||'0');
+    const reader = res.body.getReader();
+    const chunks = []; let loaded=0;
+
+    while(true) {
+      const {done,value} = await reader.read(); if(done) break;
+      chunks.push(value); loaded+=value.byteLength;
+      if(total) setP(8+Math.round((loaded/total)*58),'Downloading…',`${fmtSize(loaded)} / ${fmtSize(total)}`);
+    }
+
+    setP(70,'Decrypting…','Running AES-256-GCM decryption in browser…');
+    const raw  = new Uint8Array(chunks.reduce((a,c)=>a+c.byteLength,0));
+    let off=0; for(const c of chunks){ raw.set(c,off); off+=c.byteLength; }
+
+    const plain = await decryptBuffer(raw.buffer, pass, salt);
+    setP(100,'Done!','Decryption successful — saving file…');
+
+    const fname = filename ? cleanName(filename) : (url.split('/').pop()||'file').replace(/\.dsenc$/,'');
+    saveBlob(plain, fname);
+    toast('🔓 File decrypted and saved!','success','✔');
+    setTimeout(()=>{ wrap.classList.remove('show'); setP(0,'',''); },3000);
+
+  } catch(err) {
+    toast(err.message,'error','✕');
+    setP(0,'',''); wrap.classList.remove('show');
+  } finally {
+    if(decBtn) decBtn.disabled=false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  FILE LIST
+// ══════════════════════════════════════════════════════════════
+function renderFile(f) {
+  if (activeFiles.has(f.fileId)) return;
+  const expiresIn  = f.expiresAt-Date.now();
+  const bClass     = expiresIn<3600000?'expiring':'';
+  const isEnc      = f.name&&f.name.endsWith('.dsenc');
+  const displayName= isEnc?cleanName(f.name):f.name;
+
+  const card=document.createElement('div');
+  card.className='file-card'; card.dataset.id=f.fileId;
+  card.innerHTML=`
+    <span class="fc-icon">${fileEmoji(f.name)}</span>
+    <div class="fc-info">
+      <div class="fc-name" title="${displayName}">${displayName}</div>
+      <div class="fc-meta">
+        <span>${fmtSize(f.size)}</span>
+        <span class="fc-badge ${bClass}">⏱ ${fmtExpiry(f.expiresAt)}</span>
+        ${isEnc?'<span class="fc-badge enc">🔒 Encrypted</span>':''}
+      </div>
+    </div>
+    <div class="fc-actions">
+      <button class="fc-btn copy-l" title="Copy link">⧉</button>
+      ${isEnc
+        ? `<button class="fc-btn decry dec-list-btn" title="Decrypt & Download">🔓</button>`
+        : `<a href="${f.url}" download="${displayName}" class="fc-btn" title="Download" style="text-decoration:none;display:grid;place-items:center;">⬇</a>`
+      }
+      <button class="fc-btn del del-btn" title="Delete">🗑</button>
+    </div>`;
+
+  card.querySelector('.copy-l').addEventListener('click', ()=>clip(f.url,'Link copied!'));
+  card.querySelector('.del-btn').addEventListener('click', ()=>{
+    delTargetId=f.fileId;
+    document.getElementById('del-token-inp').value='';
+    document.getElementById('del-modal').classList.add('open');
+    document.getElementById('del-token-inp').focus();
+  });
+  const db=card.querySelector('.dec-list-btn');
+  if(db) db.addEventListener('click',()=>{
+    dmTargetId=f.fileId; dmTargetName=f.name;
+    document.getElementById('dm-pass').value=''; document.getElementById('dm-salt').value='';
+    document.getElementById('dm-modal').classList.add('open');
+    document.getElementById('dm-pass').focus();
+  });
+
+  const empty=document.getElementById('file-list').querySelector('.empty-state');
+  if(empty) empty.remove();
+  document.getElementById('file-list').prepend(card);
+  activeFiles.set(f.fileId, card);
+}
+
+function removeFile(id) {
+  const c=activeFiles.get(id); if(!c) return;
+  Object.assign(c.style,{opacity:'0',transform:'translateX(20px)',transition:'all .3s'});
+  setTimeout(()=>{ c.remove(); activeFiles.delete(id); if(!activeFiles.size) showEmpty(); },300);
+}
+function showEmpty() {
+  document.getElementById('file-list').innerHTML='<div class="empty-state"><span class="es-icon">🌐</span><p>No active files yet.<br/>Upload something to see it here.</p></div>';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  DELETE MODAL
+// ══════════════════════════════════════════════════════════════
+document.getElementById('del-cancel').addEventListener('click',()=>document.getElementById('del-modal').classList.remove('open'));
+document.getElementById('del-modal').addEventListener('click',e=>{ if(e.target===document.getElementById('del-modal')) document.getElementById('del-modal').classList.remove('open'); });
+document.getElementById('del-confirm').addEventListener('click',async()=>{
+  const token=document.getElementById('del-token-inp').value.trim();
+  if(!token){ toast('Paste owner token first','error','✕'); return; }
+  const btn=document.getElementById('del-confirm'); btn.textContent='…'; btn.disabled=true;
+  try {
+    const r=await fetch(`${API}/file/${delTargetId}`,{method:'DELETE',headers:{'x-owner-token':token}});
+    const d=await r.json(); if(!r.ok) throw new Error(d.error||'Delete failed');
+    toast('File deleted','success','✔'); removeFile(delTargetId);
+    document.getElementById('del-modal').classList.remove('open');
+  } catch(err){ toast(err.message,'error','✕'); }
+  finally{ btn.textContent='Delete Forever'; btn.disabled=false; }
+});
+
+// ══════════════════════════════════════════════════════════════
+//  DECRYPT FROM LIST MODAL
+// ══════════════════════════════════════════════════════════════
+document.getElementById('dm-cancel').addEventListener('click',()=>document.getElementById('dm-modal').classList.remove('open'));
+document.getElementById('dm-modal').addEventListener('click',e=>{ if(e.target===document.getElementById('dm-modal')) document.getElementById('dm-modal').classList.remove('open'); });
+document.getElementById('dm-confirm').addEventListener('click',async()=>{
+  const pass=document.getElementById('dm-pass').value.trim();
+  const salt=document.getElementById('dm-salt').value.trim();
+  if(!pass){ toast('Enter the passphrase','warn','⚠'); return; }
+  document.getElementById('dm-modal').classList.remove('open');
+  await fetchDecryptSave(`${API}/file/${dmTargetId}`, pass, salt, dmTargetName, 'dec');
+});
+
+// ══════════════════════════════════════════════════════════════
+//  WEBSOCKET
+// ══════════════════════════════════════════════════════════════
+function connectWS() {
+  wsConn=new WebSocket(WS_URL);
+  wsConn.onopen=()=>{ document.getElementById('ws-dot').classList.add('connected'); document.getElementById('ws-label').textContent='Live'; };
+  wsConn.onmessage=e=>{ try{ const m=JSON.parse(e.data); if(m.type==='file_ready') renderFile(m); if(m.type==='file_deleted'){ removeFile(m.fileId); toast('A file was removed','info','ℹ'); } }catch{} };
+  wsConn.onclose=()=>{ document.getElementById('ws-dot').classList.remove('connected'); document.getElementById('ws-label').textContent='Reconnecting…'; setTimeout(connectWS,3000); };
+  wsConn.onerror=()=>wsConn.close();
+}
+
+async function loadFiles() {
+  try { const r=await fetch(`${API}/files`); if(!r.ok) return; (await r.json()).forEach(renderFile); } catch{}
+}
+
+loadFiles(); connectWS();
+</script>
+</body>
+</html>
