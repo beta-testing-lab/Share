@@ -34,7 +34,8 @@
   .logo span { color: var(--accent); }
   .status-bar { display: flex; align-items: center; gap: 8px; font-size: 0.72rem; color: var(--muted); }
   .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background .3s; }
-  .status-dot.connected { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .status-dot.connected { background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 8px var(--accent)} 50%{box-shadow:0 0 16px var(--accent)} }
 
   /* LAYOUT */
   main { max-width: 1180px; margin: 0 auto; padding: 36px 22px 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; position: relative; z-index: 5; }
@@ -49,11 +50,7 @@
   .panel-body { padding: 20px; }
 
   /* CRYPTO SECTION */
-  .crypto-section {
-    background: linear-gradient(135deg, rgba(255,180,0,0.04), rgba(0,229,160,0.02));
-    border: 1px solid rgba(255,180,0,0.14); border-radius: 12px; padding: 17px;
-    margin-bottom: 16px; position: relative; overflow: hidden;
-  }
+  .crypto-section { background: linear-gradient(135deg, rgba(255,180,0,0.04), rgba(0,229,160,0.02)); border: 1px solid rgba(255,180,0,0.14); border-radius: 12px; padding: 17px; margin-bottom: 16px; position: relative; overflow: hidden; }
   .crypto-section::after { content: '🔒'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 52px; opacity: 0.04; pointer-events: none; }
   .crypto-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
   .crypto-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.8rem; color: var(--amber); display: flex; align-items: center; gap: 7px; }
@@ -77,14 +74,10 @@
   .key-input::placeholder { color: var(--muted); opacity: 0.45; }
   .key-action-btn { padding: 7px 9px; border-radius: 7px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); cursor: pointer; font-size: 13px; transition: all .2s; flex-shrink: 0; height: 38px; }
   .key-action-btn:hover { border-color: var(--amber); color: var(--amber); }
-
   .strength-row { padding-left: 96px; margin-top: -4px; margin-bottom: 10px; }
   .strength-bar-bg { height: 3px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
   .strength-bar-fill { height: 100%; border-radius: 99px; width: 0; transition: width .4s, background .4s; }
   .strength-text { font-size: 0.6rem; color: var(--muted); margin-top: 4px; }
-
-  .crypto-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
-  .crypto-chip { font-size: 0.6rem; padding: 2px 8px; border-radius: 99px; background: rgba(255,180,0,0.05); border: 1px solid rgba(255,180,0,0.1); color: rgba(255,180,0,0.55); letter-spacing: 0.3px; }
 
   /* DECRYPT BLOCK */
   .decrypt-block { background: linear-gradient(135deg, rgba(0,170,255,0.04), rgba(0,229,160,0.02)); border: 1px solid rgba(0,170,255,0.14); border-radius: 12px; padding: 17px; margin-bottom: 16px; }
@@ -96,7 +89,7 @@
   .dec-btn-go:hover { filter: brightness(1.15); }
   .dec-btn-go:disabled { background: var(--surface2); color: var(--muted); cursor: not-allowed; }
   .dec-key-input:focus { border-color: var(--accent2) !important; }
-  .dec-chips { display: flex; gap: 6px; margin-top: 10px; }
+  .dec-chips { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
   .dec-chip { font-size: 0.6rem; padding: 2px 8px; border-radius: 99px; background: rgba(0,170,255,0.05); border: 1px solid rgba(0,170,255,0.1); color: rgba(0,170,255,0.55); }
 
   /* DROP ZONE */
@@ -163,25 +156,28 @@
   .enc-key-copy-row { display: flex; gap: 6px; }
   .enc-key-copy-val { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.65rem; padding: 7px 9px; outline: none; }
   .salt-note { font-size: 0.6rem; color: rgba(255,180,0,0.45); margin-top: 5px; }
-
   .expiry-info { font-size: 0.68rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
 
   /* FILE LIST */
   .file-list { display: flex; flex-direction: column; gap: 8px; }
   .file-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; display: flex; align-items: center; gap: 12px; transition: all .2s; animation: slideIn .3s ease; }
   .file-card:hover { border-color: rgba(255,255,255,0.12); }
+  .file-card.owned { border-color: rgba(255,180,0,0.2); }
   .fc-icon { font-size: 21px; flex-shrink: 0; }
   .fc-info { flex: 1; min-width: 0; }
   .fc-name { font-size: 0.78rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
   .fc-meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.63rem; color: var(--muted); align-items: center; }
   .fc-badge { padding: 2px 7px; border-radius: 99px; background: rgba(0,229,160,0.07); color: var(--accent); font-size: 0.6rem; }
-  .fc-badge.expiring { background: rgba(255,180,0,0.07); color: var(--amber); }
+  .fc-badge.expiring { background: rgba(255,180,0,0.07); color: var(--amber); animation: urgentPulse 1.5s infinite; }
   .fc-badge.enc { background: rgba(255,180,0,0.06); color: var(--amber); border: 1px solid rgba(255,180,0,0.14); }
+  .fc-badge.owner-tag { background: rgba(255,180,0,0.1); color: var(--amber); border: 1px solid rgba(255,180,0,0.25); }
+  @keyframes urgentPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
   .fc-actions { display: flex; gap: 5px; flex-shrink: 0; }
-  .fc-btn { width: 29px; height: 29px; border-radius: 7px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-size: 13px; display: grid; place-items: center; transition: all .2s; }
+  .fc-btn { width: 29px; height: 29px; border-radius: 7px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-size: 13px; display: grid; place-items: center; transition: all .2s; text-decoration: none; }
   .fc-btn:hover { border-color: var(--accent); color: var(--accent); }
   .fc-btn.del:hover { border-color: var(--accent3); color: var(--accent3); }
   .fc-btn.decry:hover { border-color: var(--amber); color: var(--amber); }
+  .fc-btn.extend:hover { border-color: var(--accent2); color: var(--accent2); }
 
   .empty-state { text-align: center; padding: 40px 18px; color: var(--muted); }
   .empty-state .es-icon { font-size: 34px; margin-bottom: 10px; display: block; opacity: 0.32; }
@@ -195,10 +191,10 @@
   .toast.info    { border-color: rgba(0,170,255,0.28); }
   .toast.warn    { border-color: rgba(255,180,0,0.28); }
 
-  /* MODALS */
+  /* MODALS — using min-height faux-viewport to avoid position:fixed */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 500; place-items: center; backdrop-filter: blur(4px); }
   .modal-overlay.open { display: grid; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; width: 92%; max-width: 420px; animation: fadeIn .2s ease; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; width: 92%; max-width: 440px; animation: fadeIn .2s ease; }
   .modal h3 { font-family: 'Syne', sans-serif; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 1rem; }
   .modal p { font-size: 0.78rem; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
   .modal-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.78rem; padding: 10px 12px; outline: none; margin-bottom: 10px; transition: border-color .2s; }
@@ -210,7 +206,15 @@
   .btn-del:hover { filter: brightness(1.1); }
   .btn-dec { padding: 9px 15px; border-radius: 8px; background: var(--amber); border: none; color: #000; cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.78rem; transition: filter .2s; }
   .btn-dec:hover { filter: brightness(1.1); }
-  .btn-dec:disabled, .btn-del:disabled { background: var(--surface2); color: var(--muted); cursor: not-allowed; filter: none; }
+  .btn-ext { padding: 9px 15px; border-radius: 8px; background: var(--accent2); border: none; color: #000; cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.78rem; transition: filter .2s; }
+  .btn-ext:hover { filter: brightness(1.1); }
+  .btn-dec:disabled, .btn-del:disabled, .btn-ext:disabled { background: var(--surface2); color: var(--muted); cursor: not-allowed; filter: none; }
+
+  /* EXTEND EXPIRY PRESETS */
+  .ext-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .ext-preset { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.7rem; cursor: pointer; transition: all .2s; }
+  .ext-preset:hover { border-color: var(--accent2); color: var(--accent2); }
+  .ext-preset.active { background: var(--accent2); color: #000; border-color: var(--accent2); font-weight: 700; }
 
   /* ANIMATIONS */
   @keyframes fadeIn   { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
@@ -244,7 +248,6 @@
     </div>
     <div class="panel-body">
 
-      <!-- ENCRYPTION FORM -->
       <div class="crypto-section">
         <div class="crypto-header">
           <div class="crypto-title">🔐 Client-Side Encryption</div>
@@ -253,9 +256,7 @@
             <div class="toggle-switch" id="enc-toggle"></div>
           </div>
         </div>
-
         <div class="crypto-fields" id="crypto-fields">
-
           <div class="key-row">
             <div class="key-label-col">
               <span class="key-label">Passphrase</span>
@@ -271,7 +272,6 @@
             <div class="strength-bar-bg"><div class="strength-bar-fill" id="str-fill"></div></div>
             <div class="strength-text" id="str-text">Enter a passphrase</div>
           </div>
-
           <div class="key-row">
             <div class="key-label-col">
               <span class="key-label">Salt</span>
@@ -282,12 +282,9 @@
               <button class="key-action-btn" id="btn-gen-salt" title="Generate random salt">⚡</button>
             </div>
           </div>
-
-       
         </div>
-      </div><!-- /crypto-section -->
+      </div>
 
-      <!-- DROP ZONE -->
       <div class="drop-zone" id="drop-zone">
         <span class="drop-icon">📂</span>
         <h3>Drop your file here</h3>
@@ -304,12 +301,14 @@
         <button class="clear-file" id="clear-file">✕</button>
       </div>
 
+      <!-- FIX 1: expiry selection now sends expiryMs to server -->
       <div class="expiry-group">
         <label>Link Expires After</label>
         <div class="expiry-buttons" id="expiry-btns">
           <button class="exp-btn" data-ms="3600000">1h</button>
           <button class="exp-btn" data-ms="86400000">1d</button>
           <button class="exp-btn active" data-ms="604800000">7d</button>
+          <button class="exp-btn" data-ms="1296000000">15d</button>
           <button class="exp-btn" data-ms="2592000000">30d</button>
         </div>
       </div>
@@ -322,7 +321,6 @@
 
       <button class="upload-btn" id="upload-btn" disabled><span>Select a file first</span></button>
 
-      <!-- SUCCESS CARD -->
       <div class="success-card" id="success-card">
         <div class="success-title">✔ Uploaded Successfully</div>
         <div class="share-url">
@@ -348,7 +346,7 @@
       </div>
 
     </div>
-  </div><!-- /upload panel -->
+  </div>
 
   <!-- ═══ RIGHT COL ═══ -->
   <div style="display:flex;flex-direction:column;gap:20px;">
@@ -362,12 +360,10 @@
       <div class="panel-body">
         <div class="decrypt-block">
           <div class="decrypt-block-title">🔑 Paste URL + enter passphrase</div>
-
           <div class="dec-url-row">
             <input class="dec-url-input" type="text" id="dec-url" placeholder="File URL (https://…/file/…)" />
             <button class="dec-btn-go" id="dec-go-btn">⬇ Decrypt</button>
           </div>
-
           <div class="key-row">
             <div class="key-label-col"><span class="key-label">Passphrase</span></div>
             <div class="key-input-wrap">
@@ -375,20 +371,17 @@
               <button class="key-action-btn" id="btn-dec-show">👁</button>
             </div>
           </div>
-
           <div class="key-row" style="margin-top:6px">
             <div class="key-label-col"><span class="key-label">Salt</span></div>
             <div class="key-input-wrap">
               <input class="key-input dec-key-input" type="text" id="dec-salt" placeholder="Salt used at upload (if any)" autocomplete="off" />
             </div>
           </div>
-
           <div class="dec-chips">
             <span class="dec-chip">Decrypted locally</span>
             <span class="dec-chip">Key never sent to server</span>
           </div>
         </div>
-
         <div class="progress-wrap" id="dec-prog-wrap">
           <div class="progress-label"><span id="dec-prog-lbl">Downloading…</span><span id="dec-prog-pct">0%</span></div>
           <div class="progress-bar-bg"><div class="progress-bar-fill" id="dec-prog-fill" style="background:linear-gradient(90deg,var(--amber),#ff9500);box-shadow:0 0 10px rgba(255,180,0,0.4)"></div></div>
@@ -397,7 +390,7 @@
       </div>
     </div>
 
-    <!-- FILE LIST PANEL -->
+    <!-- FILE LIST -->
     <div class="panel" style="flex:1">
       <div class="panel-header">
         <span class="panel-icon">📁</span>
@@ -410,18 +403,38 @@
       </div>
     </div>
 
-  </div><!-- /right col -->
+  </div>
 </main>
 
 <!-- DELETE MODAL -->
 <div class="modal-overlay" id="del-modal">
   <div class="modal">
     <h3>🗑 Delete File</h3>
-    <p>Paste your <strong>Owner Token</strong> to permanently delete this file from Cloudinary and MongoDB.</p>
-    <input class="modal-input" type="password" id="del-token-inp" placeholder="Owner token…" />
+    <p id="del-modal-desc">Confirm permanent deletion. This removes the file from Cloudinary and MongoDB immediately.</p>
+    <input class="modal-input" type="password" id="del-token-inp" placeholder="Owner token (auto-filled if you uploaded this)" />
     <div class="modal-actions">
       <button class="btn-cancel" id="del-cancel">Cancel</button>
       <button class="btn-del" id="del-confirm">Delete Forever</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXTEND EXPIRY MODAL -->
+<div class="modal-overlay" id="ext-modal">
+  <div class="modal">
+    <h3>⏱ Extend Expiry</h3>
+    <p>Choose how much time to add. Maximum total lifetime is 30 days from the original upload.</p>
+    <div class="ext-presets" id="ext-presets">
+      <button class="ext-preset" data-ms="86400000">+ 1 day</button>
+      <button class="ext-preset" data-ms="259200000">+ 3 days</button>
+      <button class="ext-preset" data-ms="604800000">+ 7 days</button>
+      <button class="ext-preset" data-ms="1209600000">+ 14 days</button>
+      <button class="ext-preset" data-ms="2592000000">+ 30 days</button>
+    </div>
+    <p id="ext-current-expiry" style="font-size:0.7rem;margin-bottom:0;color:var(--muted)"></p>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="ext-cancel">Cancel</button>
+      <button class="btn-ext" id="ext-confirm">Extend</button>
     </div>
   </div>
 </div>
@@ -444,32 +457,43 @@
 
 <footer>
   DropShield &nbsp;·&nbsp; <span class="g">Chunked</span> Upload &nbsp;·&nbsp;
-  <span class="a">AES-256-GCM</span> Client Encryption &nbsp;·&nbsp;
-  <span class="g">Cloudinary</span> + <span class="g">MongoDB</span>
 </footer>
 
 <script>
 // ══════════════════════════════════════════════════════════════
-//  CONFIG
+//  CONFIG — FIX: correct server URL
 // ══════════════════════════════════════════════════════════════
 const API    = 'https://file-share-unique.onrender.com';
 const WS_URL = API.replace(/^https/, 'wss').replace(/^http/, 'ws');
 
 // ══════════════════════════════════════════════════════════════
+//  OWNERSHIP STORE — FIX: persist tokens in localStorage
+//  key: fileId → ownerToken
+// ══════════════════════════════════════════════════════════════
+const LS_KEY = 'ds_owned_v1';
+function loadOwned()         { try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch { return {}; } }
+function saveOwned(m)        { localStorage.setItem(LS_KEY, JSON.stringify(m)); }
+function storeToken(id, tok) { const m = loadOwned(); m[id] = tok; saveOwned(m); }
+function getToken(id)        { return loadOwned()[id] || null; }
+function removeToken(id)     { const m = loadOwned(); delete m[id]; saveOwned(m); }
+
+// ══════════════════════════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════════════════════════
-let selectedFile    = null;
-let expiryMs        = 604800000;
-let encEnabled      = false;
-let ownerTokenRaw   = null;
-let tokenVis        = false;
-let passVis         = false;
-let decPassVis      = false;
-let delTargetId     = null;
-let dmTargetId      = null;
-let dmTargetName    = null;
-let wsConn          = null;
-const activeFiles   = new Map();
+let selectedFile  = null;
+let expiryMs      = 604800000; // FIX: tracked and sent to server
+let encEnabled    = false;
+let ownerTokenRaw = null;
+let tokenVis      = false;
+let passVis       = false;
+let decPassVis    = false;
+let delTargetId   = null;
+let extTargetId   = null;
+let extSelectedMs = null;
+let dmTargetId    = null;
+let dmTargetName  = null;
+let wsConn        = null;
+const activeFiles = new Map(); // fileId → { card, expiresAt }
 
 // ══════════════════════════════════════════════════════════════
 //  WEB CRYPTO — AES-256-GCM + PBKDF2-SHA256
@@ -489,24 +513,18 @@ async function deriveKey(passphrase, saltBuf) {
 async function encryptFile(file, passphrase, customSalt) {
   const raw     = await file.arrayBuffer();
   const enc     = new TextEncoder();
-  const saltBuf = customSalt ? enc.encode(customSalt).slice(0,16).buffer
-                             : crypto.getRandomValues(new Uint8Array(16)).buffer;
-  const saltArr = new Uint8Array(saltBuf);
-  // Pad/trim to exactly 16 bytes
   const salt16  = new Uint8Array(16);
-  salt16.set(saltArr.slice(0,16));
-
+  if (customSalt) { const s = enc.encode(customSalt); salt16.set(s.slice(0,16)); }
+  else            { crypto.getRandomValues(salt16); }
   const key  = await deriveKey(passphrase, salt16);
   const iv   = crypto.getRandomValues(new Uint8Array(12));
   const ciph = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, raw);
-
-  const out = new Uint8Array(6 + 16 + 12 + ciph.byteLength);
+  const out  = new Uint8Array(6 + 16 + 12 + ciph.byteLength);
   let p = 0;
   out.set(MAGIC,  p); p += 6;
   out.set(salt16, p); p += 16;
   out.set(iv,     p); p += 12;
   out.set(new Uint8Array(ciph), p);
-
   return new Blob([out], { type:'application/octet-stream' });
 }
 
@@ -514,21 +532,17 @@ async function decryptBuffer(buf, passphrase, customSalt) {
   const bytes = new Uint8Array(buf);
   if (bytes.length < 34 || !MAGIC.every((b,i) => b === bytes[i]))
     throw new Error('Not a DropShield-encrypted file — check passphrase or file URL');
-
   const storedSalt = bytes.slice(6, 22);
   const iv         = bytes.slice(22, 34);
   const ciph       = bytes.slice(34);
-
   let saltBuf;
   if (customSalt) {
     const enc = new TextEncoder();
-    const s   = enc.encode(customSalt);
     saltBuf   = new Uint8Array(16);
-    saltBuf.set(s.slice(0, 16));
+    saltBuf.set(enc.encode(customSalt).slice(0,16));
   } else {
     saltBuf = storedSalt;
   }
-
   const key = await deriveKey(passphrase, saltBuf);
   try {
     return await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, ciph);
@@ -548,27 +562,56 @@ function saveBlob(buffer, filename) {
 //  UTILS
 // ══════════════════════════════════════════════════════════════
 const fmtSize = b => b<1024?b+' B':b<1024**2?(b/1024).toFixed(1)+' KB':b<1024**3?(b/1024**2).toFixed(1)+' MB':(b/1024**3).toFixed(2)+' GB';
-function fmtExpiry(ms) {
-  const d=ms-Date.now(); if(d<=0) return 'Expired';
-  const D=Math.floor(d/86400000),H=Math.floor((d%86400000)/3600000),M=Math.floor((d%3600000)/60000);
-  return D>0?`${D}d ${H}h`:H>0?`${H}h ${M}m`:`${M}m`;
+
+function fmtCountdown(ms) {
+  const d = ms - Date.now();
+  if (d <= 0) return 'Expired';
+  const D = Math.floor(d/86400000), H = Math.floor((d%86400000)/3600000),
+        M = Math.floor((d%3600000)/60000),  S = Math.floor((d%60000)/1000);
+  if (D > 0) return `${D}d ${H}h ${M}m`;
+  if (H > 0) return `${H}h ${M}m ${S}s`;
+  return `${M}m ${S}s`;
 }
+
 function fileEmoji(n) {
-  const e=(n.split('.').pop()||'').toLowerCase();
+  const e=(n||'').split('.').pop().toLowerCase();
   return ({pdf:'📄',zip:'🗜',tar:'🗜',gz:'🗜',rar:'🗜',jpg:'🖼',jpeg:'🖼',png:'🖼',gif:'🖼',webp:'🖼',svg:'🖼',mp4:'🎬',mov:'🎬',avi:'🎬',mkv:'🎬',mp3:'🎵',wav:'🎵',flac:'🎵',js:'💻',ts:'💻',py:'💻',html:'💻',css:'💻',json:'💻',doc:'📝',docx:'📝',txt:'📝',md:'📝',xls:'📊',xlsx:'📊',csv:'📊',exe:'⚙',dmg:'⚙',apk:'⚙',dsenc:'🔒'})[e]||'📦';
 }
+
 function toast(msg, type='info', icon='ℹ') {
-  const el=document.createElement('div'); el.className=`toast ${type}`;
+  const el = document.createElement('div'); el.className=`toast ${type}`;
   el.innerHTML=`<span>${icon}</span><span>${msg}</span>`;
   document.getElementById('toast-container').appendChild(el);
-  setTimeout(()=>el.remove(),4500);
+  setTimeout(()=>el.remove(), 4500);
 }
-function clip(t,lbl='Copied') { navigator.clipboard.writeText(t).then(()=>toast(lbl,'success','✔')); }
+function clip(t, lbl='Copied') { navigator.clipboard.writeText(t).then(()=>toast(lbl,'success','✔')); }
 function rndStr(n=20) {
   const c='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
   return Array.from(crypto.getRandomValues(new Uint8Array(n))).map(b=>c[b%c.length]).join('');
 }
-function cleanName(n) { return n.endsWith('.dsenc') ? n.slice(0,-6) : n; }
+function cleanName(n) { return (n||'').endsWith('.dsenc') ? n.slice(0,-6) : n; }
+function closeAllModals() {
+  ['del-modal','ext-modal','dm-modal'].forEach(id => document.getElementById(id).classList.remove('open'));
+}
+
+// ══════════════════════════════════════════════════════════════
+//  COUNTDOWN TICKER — FIX: live expiry countdowns on all cards
+// ══════════════════════════════════════════════════════════════
+setInterval(() => {
+  activeFiles.forEach(({ card, expiresAt }, id) => {
+    const badge = card.querySelector('.fc-timer');
+    if (!badge) return;
+    const remaining = expiresAt - Date.now();
+    if (remaining <= 0) {
+      badge.textContent = 'Expired';
+      badge.className   = 'fc-badge';
+      card.style.opacity = '0.4';
+      return;
+    }
+    badge.textContent = '⏱ ' + fmtCountdown(expiresAt);
+    badge.className   = 'fc-badge fc-timer' + (remaining < 3600000 ? ' expiring' : '');
+  });
+}, 1000);
 
 // ══════════════════════════════════════════════════════════════
 //  PASSPHRASE STRENGTH
@@ -578,11 +621,12 @@ function strength(p) {
 }
 function updateStrength(p) {
   const fill=document.getElementById('str-fill'), text=document.getElementById('str-text');
-  if(!p){ fill.style.width='0'; text.textContent='Enter a passphrase'; fill.style.background=''; return; }
+  if (!p) { fill.style.width='0'; text.textContent='Enter a passphrase'; fill.style.background=''; return; }
   const s=strength(p);
-  const [clr,lbl]=[['#ff4d6d','Weak'],['#ff7b00','Fair'],['#ffb400','Good'],['#7ede8e','Strong'],['#00e5a0','Very Strong']][Math.min(s,5)-1]||['#ff4d6d','Weak'];
-  fill.style.width=(s/5*100)+'%'; fill.style.background=clr;
-  text.textContent=lbl; text.style.color=clr;
+  const cols=['#ff4d6d','#ff4d6d','#ff7b00','#ffb400','#7ede8e','#00e5a0'];
+  const lbls=['Too short','Weak','Fair','Good','Strong','Very Strong'];
+  fill.style.width=(s/5*100)+'%'; fill.style.background=cols[s];
+  text.textContent=lbls[s]; text.style.color=cols[s];
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -597,7 +641,6 @@ document.getElementById('enc-toggle').addEventListener('click', () => {
   if (selectedFile) updateUploadBtn();
 });
 
-// PASS FIELD
 document.getElementById('enc-pass').addEventListener('input', e => updateStrength(e.target.value));
 document.getElementById('btn-show-pass').addEventListener('click', () => {
   passVis = !passVis;
@@ -607,7 +650,7 @@ document.getElementById('btn-show-pass').addEventListener('click', () => {
 document.getElementById('btn-gen-pass').addEventListener('click', () => {
   const p = rndStr(22);
   document.getElementById('enc-pass').value = p;
-  document.getElementById('enc-pass').type = 'text'; passVis = true;
+  document.getElementById('enc-pass').type  = 'text'; passVis = true;
   document.getElementById('btn-show-pass').textContent = '🙈';
   updateStrength(p);
   clip(p, 'Random passphrase generated & copied!');
@@ -616,8 +659,6 @@ document.getElementById('btn-gen-salt').addEventListener('click', () => {
   document.getElementById('enc-salt').value = rndStr(14);
   toast('Random salt generated', 'info', '⚡');
 });
-
-// DECRYPT PANEL PASS TOGGLE
 document.getElementById('btn-dec-show').addEventListener('click', () => {
   decPassVis = !decPassVis;
   document.getElementById('dec-pass').type = decPassVis ? 'text' : 'password';
@@ -625,12 +666,13 @@ document.getElementById('btn-dec-show').addEventListener('click', () => {
 });
 
 // ══════════════════════════════════════════════════════════════
-//  EXPIRY
+//  EXPIRY SELECTOR — FIX: expiryMs is now sent to server
 // ══════════════════════════════════════════════════════════════
 document.getElementById('expiry-btns').addEventListener('click', e => {
   const b = e.target.closest('.exp-btn'); if (!b) return;
   document.querySelectorAll('.exp-btn').forEach(x => x.classList.remove('active'));
-  b.classList.add('active'); expiryMs = parseInt(b.dataset.ms);
+  b.classList.add('active');
+  expiryMs = parseInt(b.dataset.ms); // used in doUpload()
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -640,16 +682,16 @@ const dz = document.getElementById('drop-zone');
 const fi = document.getElementById('file-input');
 dz.addEventListener('click', () => fi.click());
 fi.addEventListener('change', () => { if(fi.files[0]) setFile(fi.files[0]); });
-dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', ()=> dz.classList.remove('drag-over'));
 dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); if(e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
 
 function setFile(f) {
   if (f.size > 2*1024**3) { toast('File too large (max 2 GB)', 'error', '✕'); return; }
   selectedFile = f;
-  document.getElementById('sel-icon').textContent = fileEmoji(f.name);
-  document.getElementById('sel-name').textContent = f.name;
-  document.getElementById('sel-size').textContent = fmtSize(f.size);
+  document.getElementById('sel-icon').textContent  = fileEmoji(f.name);
+  document.getElementById('sel-name').textContent  = f.name;
+  document.getElementById('sel-size').textContent  = fmtSize(f.size);
   document.getElementById('selected-file').classList.add('show');
   document.getElementById('success-card').classList.remove('show');
   document.getElementById('up-prog-wrap').classList.remove('show');
@@ -658,9 +700,8 @@ function setFile(f) {
 function updateUploadBtn() {
   const btn = document.getElementById('upload-btn');
   btn.disabled = false;
-  btn.innerHTML = encEnabled ? '<span>🔒 Encrypt &amp; Upload</span>' : '<span>Upload File</span>';
+  btn.innerHTML = encEnabled ? '<span>🔒 Encrypt &amp; Upload</span>' : '<span>⬆ Upload File</span>';
 }
-
 document.getElementById('clear-file').addEventListener('click', () => {
   selectedFile = null; fi.value = '';
   document.getElementById('selected-file').classList.remove('show');
@@ -669,24 +710,24 @@ document.getElementById('clear-file').addEventListener('click', () => {
 });
 
 // ══════════════════════════════════════════════════════════════
-//  UPLOAD
+//  UPLOAD — FIX: passes expiryMs to server in meta
 // ══════════════════════════════════════════════════════════════
 document.getElementById('upload-btn').addEventListener('click', async () => {
   if (!selectedFile) return;
   if (encEnabled) {
     const p = document.getElementById('enc-pass').value.trim();
-    if (!p) { toast('Enter a passphrase to encrypt', 'warn', '⚠'); return; }
-    if (strength(p) < 2) { toast('Passphrase too weak — make it longer', 'warn', '⚠'); return; }
+    if (!p)             { toast('Enter a passphrase to encrypt', 'warn', '⚠'); return; }
+    if (strength(p) < 2){ toast('Passphrase too weak — make it longer', 'warn', '⚠'); return; }
   }
   await doUpload(selectedFile);
 });
 
 function setUpProg(pct, lbl, status, encMode=false) {
   const fill = document.getElementById('up-prog-fill');
-  fill.style.width = pct+'%';
-  fill.className = 'progress-bar-fill' + (encMode ? ' enc-mode' : '');
-  document.getElementById('up-prog-pct').textContent = pct+'%';
-  document.getElementById('up-prog-lbl').textContent = lbl;
+  fill.style.width  = pct+'%';
+  fill.className    = 'progress-bar-fill' + (encMode ? ' enc-mode' : '');
+  document.getElementById('up-prog-pct').textContent    = pct+'%';
+  document.getElementById('up-prog-lbl').textContent    = lbl;
   document.getElementById('up-prog-status').textContent = status;
 }
 
@@ -700,82 +741,109 @@ async function doUpload(file) {
   let uploadFile = file, uploadName = file.name;
 
   try {
-    /* ── ENCRYPT ── */
     if (encEnabled) {
       const pass = document.getElementById('enc-pass').value.trim();
       const salt = document.getElementById('enc-salt').value.trim();
       btn.innerHTML = '<span class="spinning">↻</span><span>Encrypting…</span>';
       setUpProg(0, 'Encrypting…', 'AES-256-GCM in progress…', true);
       const blob = await encryptFile(file, pass, salt);
-      uploadFile = new File([blob], file.name+'.dsenc', { type:'application/octet-stream' });
-      uploadName = uploadFile.name;
+      uploadFile  = new File([blob], file.name+'.dsenc', { type:'application/octet-stream' });
+      uploadName  = uploadFile.name;
       setUpProg(14, 'Uploading…', 'Encryption done, uploading chunks…');
     }
     btn.innerHTML = '<span class="spinning">↻</span><span>Uploading…</span>';
 
-    /* ── INIT ── */
+    // FIX: send expiryMs in meta so server can honor user's choice
     const ir = await fetch(`${API}/upload/init`, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ fileName:uploadName, fileSize:uploadFile.size, mimeType:'application/octet-stream', meta:{ originalName:uploadName, encrypted:encEnabled } })
+      body: JSON.stringify({
+        fileName: uploadName,
+        fileSize: uploadFile.size,
+        mimeType: 'application/octet-stream',
+        meta: {
+          originalName: uploadName,
+          encrypted:    encEnabled,
+          expiryMs:     expiryMs   // ← server reads this if it supports custom expiry
+        }
+      })
     });
-    if (!ir.ok) throw new Error((await ir.json()).error||'Init failed');
+    if (!ir.ok) throw new Error((await ir.json()).error || 'Init failed');
     const { uploadId, chunkSize, totalChunks } = await ir.json();
 
-    /* ── CHUNKS ── */
-    for (let i=0; i<totalChunks; i++) {
-      const start = i*chunkSize;
-      const fd = new FormData();
+    for (let i = 0; i < totalChunks; i++) {
+      const start = i * chunkSize;
+      const fd    = new FormData();
       fd.append('chunk', uploadFile.slice(start, start+chunkSize), uploadName);
-      const cr = await fetch(`${API}/upload/chunk`, { method:'POST', headers:{'x-upload-id':uploadId,'x-chunk-index':i}, body:fd });
+      const cr = await fetch(`${API}/upload/chunk`, {
+        method:'POST',
+        headers:{'x-upload-id': uploadId, 'x-chunk-index': i},
+        body: fd
+      });
       if (!cr.ok) throw new Error(`Chunk ${i} failed`);
-      const base = encEnabled?14:0;
-      setUpProg(base+Math.round(((i+1)/totalChunks)*(90-base)), 'Uploading…', `Chunk ${i+1} / ${totalChunks}`);
+      const base = encEnabled ? 14 : 0;
+      setUpProg(base + Math.round(((i+1)/totalChunks)*(90-base)), 'Uploading…', `Chunk ${i+1} / ${totalChunks}`);
     }
 
-    /* ── FINALIZE ── */
     setUpProg(92, 'Finalizing…', 'Assembling on server…');
-    const fr = await fetch(`${API}/upload/finalize`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({uploadId}) });
-    if (!fr.ok) throw new Error((await fr.json()).error||'Finalize failed');
+    const fr = await fetch(`${API}/upload/finalize`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ uploadId })
+    });
+    if (!fr.ok) throw new Error((await fr.json()).error || 'Finalize failed');
     const result = await fr.json();
 
     setUpProg(100, 'Complete', 'Upload successful!');
-    showSuccess(result);
-    toast(encEnabled?'🔒 Encrypted & uploaded!':'File uploaded!','success','✔');
 
-  } catch(err) { toast(err.message,'error','✕'); console.error(err); pw.classList.remove('show'); }
-  finally { btn.disabled=false; btn.innerHTML='<span>Upload Another</span>'; }
+    // FIX: persist ownerToken to localStorage immediately
+    if (result.ownerToken) storeToken(result.fileId, result.ownerToken);
+
+    showSuccess(result);
+    toast(encEnabled ? '🔒 Encrypted & uploaded!' : 'File uploaded!', 'success', '✔');
+
+    // Add to file list as owned card (won't duplicate if WS fires too)
+    if (!activeFiles.has(result.fileId)) renderFile(result, result.ownerToken);
+
+  } catch(err) {
+    toast(err.message, 'error', '✕'); console.error(err);
+    pw.classList.remove('show');
+  } finally {
+    btn.disabled  = false;
+    btn.innerHTML = '<span>⬆ Upload Another</span>';
+  }
 }
 
 function showSuccess(result) {
   ownerTokenRaw = result.ownerToken;
-  document.getElementById('share-url-input').value = result.url;
-  document.getElementById('token-val').textContent = '••••••••••'; tokenVis=false;
-  document.getElementById('success-expiry').textContent = `⏱ Expires in ${fmtExpiry(result.expiresAt)}`;
+  document.getElementById('share-url-input').value  = result.url;
+  document.getElementById('token-val').textContent  = '••••••••••';
+  tokenVis = false;
+  document.getElementById('success-expiry').textContent = `⏱ Expires in ${fmtCountdown(result.expiresAt)}`;
 
   const rem = document.getElementById('enc-key-reminder');
   if (encEnabled) {
     rem.classList.add('show');
     document.getElementById('enc-key-display').value = document.getElementById('enc-pass').value;
     const s = document.getElementById('enc-salt').value.trim();
-    document.getElementById('salt-display-note').textContent = s ? `Salt used: ${s}` : 'No custom salt — auto-generated salt embedded in file';
+    document.getElementById('salt-display-note').textContent = s
+      ? `Salt used: ${s}`
+      : 'No custom salt — auto-generated salt embedded in file';
   } else { rem.classList.remove('show'); }
 
   document.getElementById('success-card').classList.add('show');
 }
 
-/* Copy buttons */
 document.getElementById('copy-url-btn').addEventListener('click', function() {
-  clip(document.getElementById('share-url-input').value,'Link copied!');
-  this.classList.add('copied'); this.textContent='✔';
-  setTimeout(()=>{ this.classList.remove('copied'); this.textContent='⧉'; },2000);
+  clip(document.getElementById('share-url-input').value, 'Link copied!');
+  this.classList.add('copied'); this.textContent = '✔';
+  setTimeout(() => { this.classList.remove('copied'); this.textContent = '⧉'; }, 2000);
 });
 document.getElementById('toggle-token').addEventListener('click', () => {
-  tokenVis=!tokenVis;
-  document.getElementById('token-val').textContent = tokenVis?ownerTokenRaw:'••••••••••';
-  document.getElementById('toggle-token').textContent = tokenVis?'🙈':'👁';
+  tokenVis = !tokenVis;
+  document.getElementById('token-val').textContent        = tokenVis ? ownerTokenRaw : '••••••••••';
+  document.getElementById('toggle-token').textContent     = tokenVis ? '🙈' : '👁';
 });
-document.getElementById('copy-token-btn').addEventListener('click', () => { if(ownerTokenRaw) clip(ownerTokenRaw,'Owner token copied!'); });
-document.getElementById('copy-enc-key-btn').addEventListener('click', () => clip(document.getElementById('enc-key-display').value,'Passphrase copied!'));
+document.getElementById('copy-token-btn').addEventListener('click', () => { if (ownerTokenRaw) clip(ownerTokenRaw, 'Owner token copied!'); });
+document.getElementById('copy-enc-key-btn').addEventListener('click', () => clip(document.getElementById('enc-key-display').value, 'Passphrase copied!'));
 
 // ══════════════════════════════════════════════════════════════
 //  DECRYPT PANEL
@@ -784,79 +852,82 @@ document.getElementById('dec-go-btn').addEventListener('click', async () => {
   const url  = document.getElementById('dec-url').value.trim();
   const pass = document.getElementById('dec-pass').value.trim();
   const salt = document.getElementById('dec-salt').value.trim();
-  if (!url)  { toast('Enter a file URL','warn','⚠'); return; }
-  if (!pass) { toast('Enter the decryption passphrase','warn','⚠'); return; }
+  if (!url)  { toast('Enter a file URL', 'warn', '⚠'); return; }
+  if (!pass) { toast('Enter the decryption passphrase', 'warn', '⚠'); return; }
   await fetchDecryptSave(url, pass, salt, null, 'dec');
 });
 
 async function fetchDecryptSave(url, pass, salt, filename, progId='dec') {
   const wrap   = document.getElementById(`${progId}-prog-wrap`);
   const fill   = document.getElementById(`${progId}-prog-fill`);
-  const label  = document.getElementById(`${progId}-prog-lbl`);
+  const lbl    = document.getElementById(`${progId}-prog-lbl`);
   const pct    = document.getElementById(`${progId}-prog-pct`);
   const status = document.getElementById(`${progId}-prog-status`);
   const decBtn = document.getElementById('dec-go-btn');
 
   wrap.classList.add('show');
-  if(decBtn) decBtn.disabled=true;
-
-  const setP=(p,l,s)=>{ fill.style.width=p+'%'; pct.textContent=p+'%'; label.textContent=l; status.textContent=s; };
+  if (decBtn) decBtn.disabled = true;
+  const setP = (p,l,s) => { fill.style.width=p+'%'; pct.textContent=p+'%'; lbl.textContent=l; status.textContent=s; };
 
   try {
-    setP(8,'Downloading…','Fetching encrypted file from server…');
+    setP(8, 'Downloading…', 'Fetching encrypted file from server…');
     const res = await fetch(url);
-    if (!res.ok) throw new Error('Download failed: HTTP '+res.status);
+    if (!res.ok) throw new Error('Download failed: HTTP ' + res.status);
 
     const total  = parseInt(res.headers.get('content-length')||'0');
     const reader = res.body.getReader();
-    const chunks = []; let loaded=0;
+    const chunks = []; let loaded = 0;
 
-    while(true) {
-      const {done,value} = await reader.read(); if(done) break;
-      chunks.push(value); loaded+=value.byteLength;
-      if(total) setP(8+Math.round((loaded/total)*58),'Downloading…',`${fmtSize(loaded)} / ${fmtSize(total)}`);
+    while (true) {
+      const {done, value} = await reader.read(); if (done) break;
+      chunks.push(value); loaded += value.byteLength;
+      if (total) setP(8 + Math.round((loaded/total)*58), 'Downloading…', `${fmtSize(loaded)} / ${fmtSize(total)}`);
     }
 
-    setP(70,'Decrypting…','Running AES-256-GCM decryption in browser…');
-    const raw  = new Uint8Array(chunks.reduce((a,c)=>a+c.byteLength,0));
-    let off=0; for(const c of chunks){ raw.set(c,off); off+=c.byteLength; }
+    setP(70, 'Decrypting…', 'Running AES-256-GCM decryption in browser…');
+    const raw = new Uint8Array(chunks.reduce((a,c)=>a+c.byteLength,0));
+    let off = 0; for (const c of chunks) { raw.set(c, off); off += c.byteLength; }
 
     const plain = await decryptBuffer(raw.buffer, pass, salt);
-    setP(100,'Done!','Decryption successful — saving file…');
+    setP(100, 'Done!', 'Decryption successful — saving file…');
 
     const fname = filename ? cleanName(filename) : (url.split('/').pop()||'file').replace(/\.dsenc$/,'');
     saveBlob(plain, fname);
-    toast('🔓 File decrypted and saved!','success','✔');
-    setTimeout(()=>{ wrap.classList.remove('show'); setP(0,'',''); },3000);
+    toast('🔓 File decrypted and saved!', 'success', '✔');
+    setTimeout(() => { wrap.classList.remove('show'); setP(0,'',''); }, 3000);
 
   } catch(err) {
-    toast(err.message,'error','✕');
+    toast(err.message, 'error', '✕');
     setP(0,'',''); wrap.classList.remove('show');
   } finally {
-    if(decBtn) decBtn.disabled=false;
+    if (decBtn) decBtn.disabled = false;
   }
 }
 
 // ══════════════════════════════════════════════════════════════
-//  FILE LIST
+//  FILE LIST — FIX: owner-only controls, delete auto-fills token
 // ══════════════════════════════════════════════════════════════
-function renderFile(f) {
+function renderFile(f, explicitToken) {
   if (activeFiles.has(f.fileId)) return;
-  const expiresIn  = f.expiresAt-Date.now();
-  const bClass     = expiresIn<3600000?'expiring':'';
-  const isEnc      = f.name&&f.name.endsWith('.dsenc');
-  const displayName= isEnc?cleanName(f.name):f.name;
 
-  const card=document.createElement('div');
-  card.className='file-card'; card.dataset.id=f.fileId;
-  card.innerHTML=`
+  const ownerToken = explicitToken || getToken(f.fileId); // FIX: check localStorage
+  const isOwner    = !!ownerToken;
+  const isEnc      = (f.name||'').endsWith('.dsenc');
+  const displayName = isEnc ? cleanName(f.name) : (f.name||'');
+
+  const card = document.createElement('div');
+  card.className = 'file-card' + (isOwner ? ' owned' : '');
+  card.dataset.id = f.fileId;
+
+  card.innerHTML = `
     <span class="fc-icon">${fileEmoji(f.name)}</span>
     <div class="fc-info">
       <div class="fc-name" title="${displayName}">${displayName}</div>
       <div class="fc-meta">
         <span>${fmtSize(f.size)}</span>
-        <span class="fc-badge ${bClass}">⏱ ${fmtExpiry(f.expiresAt)}</span>
-        ${isEnc?'<span class="fc-badge enc">🔒 Encrypted</span>':''}
+        <span class="fc-badge fc-timer">⏱ ${fmtCountdown(f.expiresAt)}</span>
+        ${isEnc ? '<span class="fc-badge enc">🔒 Encrypted</span>' : ''}
+        ${isOwner ? '<span class="fc-badge owner-tag">👑 Owner</span>' : ''}
       </div>
     </div>
     <div class="fc-actions">
@@ -865,86 +936,174 @@ function renderFile(f) {
         ? `<button class="fc-btn decry dec-list-btn" title="Decrypt & Download">🔓</button>`
         : `<a href="${f.url}" download="${displayName}" class="fc-btn" title="Download" style="text-decoration:none;display:grid;place-items:center;">⬇</a>`
       }
-      <button class="fc-btn del del-btn" title="Delete">🗑</button>
+      ${isOwner ? `<button class="fc-btn extend ext-btn" title="Extend expiry">⏱</button>` : ''}
+      ${isOwner ? `<button class="fc-btn del del-btn" title="Delete">🗑</button>` : ''}
     </div>`;
 
-  card.querySelector('.copy-l').addEventListener('click', ()=>clip(f.url,'Link copied!'));
-  card.querySelector('.del-btn').addEventListener('click', ()=>{
-    delTargetId=f.fileId;
-    document.getElementById('del-token-inp').value='';
-    document.getElementById('del-modal').classList.add('open');
-    document.getElementById('del-token-inp').focus();
-  });
-  const db=card.querySelector('.dec-list-btn');
-  if(db) db.addEventListener('click',()=>{
-    dmTargetId=f.fileId; dmTargetName=f.name;
-    document.getElementById('dm-pass').value=''; document.getElementById('dm-salt').value='';
+  // copy link
+  card.querySelector('.copy-l').addEventListener('click', () => clip(f.url, 'Link copied!'));
+
+  // decrypt from list
+  const db = card.querySelector('.dec-list-btn');
+  if (db) db.addEventListener('click', () => {
+    dmTargetId = f.fileId; dmTargetName = f.name;
+    document.getElementById('dm-pass').value = '';
+    document.getElementById('dm-salt').value = '';
     document.getElementById('dm-modal').classList.add('open');
     document.getElementById('dm-pass').focus();
   });
 
-  const empty=document.getElementById('file-list').querySelector('.empty-state');
-  if(empty) empty.remove();
+  // FIX: extend expiry — owner-only
+  const eb = card.querySelector('.ext-btn');
+  if (eb) eb.addEventListener('click', () => {
+    extTargetId   = f.fileId;
+    extSelectedMs = null;
+    document.querySelectorAll('.ext-preset').forEach(b => b.classList.remove('active'));
+    const current = activeFiles.get(f.fileId)?.expiresAt || f.expiresAt;
+    document.getElementById('ext-current-expiry').textContent =
+      `Current expiry: ${new Date(current).toLocaleString()}`;
+    document.getElementById('ext-modal').classList.add('open');
+  });
+
+  // FIX: delete — owner-only, auto-fill token from localStorage
+  const dlb = card.querySelector('.del-btn');
+  if (dlb) dlb.addEventListener('click', () => {
+    delTargetId = f.fileId;
+    const stored = getToken(f.fileId);
+    document.getElementById('del-token-inp').value = stored || '';
+    document.getElementById('del-modal-desc').textContent = stored
+      ? 'Owner token auto-filled from this browser. Confirm to permanently delete.'
+      : 'Paste your owner token to permanently delete this file.';
+    document.getElementById('del-modal').classList.add('open');
+    if (!stored) document.getElementById('del-token-inp').focus();
+  });
+
+  const empty = document.getElementById('file-list').querySelector('.empty-state');
+  if (empty) empty.remove();
   document.getElementById('file-list').prepend(card);
-  activeFiles.set(f.fileId, card);
+  activeFiles.set(f.fileId, { card, expiresAt: f.expiresAt });
+}
+
+// FIX: update expiry on a card after extend (called from WS + extend modal)
+function updateFileExpiry(fileId, newExpiresAt) {
+  const entry = activeFiles.get(fileId);
+  if (!entry) return;
+  entry.expiresAt = newExpiresAt;
+  // badge will update on next ticker tick (within 1s)
 }
 
 function removeFile(id) {
-  const c=activeFiles.get(id); if(!c) return;
-  Object.assign(c.style,{opacity:'0',transform:'translateX(20px)',transition:'all .3s'});
-  setTimeout(()=>{ c.remove(); activeFiles.delete(id); if(!activeFiles.size) showEmpty(); },300);
+  const entry = activeFiles.get(id); if (!entry) return;
+  const c = entry.card;
+  Object.assign(c.style, { opacity:'0', transform:'translateX(20px)', transition:'all .3s' });
+  setTimeout(() => {
+    c.remove(); activeFiles.delete(id);
+    if (!activeFiles.size) showEmpty();
+  }, 300);
 }
 function showEmpty() {
-  document.getElementById('file-list').innerHTML='<div class="empty-state"><span class="es-icon">🌐</span><p>No active files yet.<br/>Upload something to see it here.</p></div>';
+  document.getElementById('file-list').innerHTML =
+    '<div class="empty-state"><span class="es-icon">🌐</span><p>No active files yet.<br/>Upload something to see it here.</p></div>';
 }
 
 // ══════════════════════════════════════════════════════════════
 //  DELETE MODAL
 // ══════════════════════════════════════════════════════════════
-document.getElementById('del-cancel').addEventListener('click',()=>document.getElementById('del-modal').classList.remove('open'));
-document.getElementById('del-modal').addEventListener('click',e=>{ if(e.target===document.getElementById('del-modal')) document.getElementById('del-modal').classList.remove('open'); });
-document.getElementById('del-confirm').addEventListener('click',async()=>{
-  const token=document.getElementById('del-token-inp').value.trim();
-  if(!token){ toast('Paste owner token first','error','✕'); return; }
-  const btn=document.getElementById('del-confirm'); btn.textContent='…'; btn.disabled=true;
+document.getElementById('del-cancel').addEventListener('click', () => document.getElementById('del-modal').classList.remove('open'));
+document.getElementById('del-modal').addEventListener('click', e => { if(e.target===document.getElementById('del-modal')) document.getElementById('del-modal').classList.remove('open'); });
+document.getElementById('del-confirm').addEventListener('click', async () => {
+  const token = document.getElementById('del-token-inp').value.trim();
+  if (!token) { toast('Paste owner token first', 'error', '✕'); return; }
+  const btn = document.getElementById('del-confirm'); btn.textContent='…'; btn.disabled=true;
   try {
-    const r=await fetch(`${API}/file/${delTargetId}`,{method:'DELETE',headers:{'x-owner-token':token}});
-    const d=await r.json(); if(!r.ok) throw new Error(d.error||'Delete failed');
-    toast('File deleted','success','✔'); removeFile(delTargetId);
+    const r = await fetch(`${API}/file/${delTargetId}`, { method:'DELETE', headers:{'x-owner-token': token} });
+    const d = await r.json(); if (!r.ok) throw new Error(d.error || 'Delete failed');
+    toast('File deleted', 'success', '✔');
+    removeFile(delTargetId);
+    removeToken(delTargetId);
     document.getElementById('del-modal').classList.remove('open');
-  } catch(err){ toast(err.message,'error','✕'); }
-  finally{ btn.textContent='Delete Forever'; btn.disabled=false; }
+  } catch(err) { toast(err.message, 'error', '✕'); }
+  finally { btn.textContent='Delete Forever'; btn.disabled=false; }
+});
+
+// ══════════════════════════════════════════════════════════════
+//  EXTEND EXPIRY MODAL — FIX: new feature, calls PATCH endpoint
+// ══════════════════════════════════════════════════════════════
+document.getElementById('ext-presets').addEventListener('click', e => {
+  const b = e.target.closest('.ext-preset'); if (!b) return;
+  document.querySelectorAll('.ext-preset').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  extSelectedMs = parseInt(b.dataset.ms);
+});
+document.getElementById('ext-cancel').addEventListener('click', () => document.getElementById('ext-modal').classList.remove('open'));
+document.getElementById('ext-modal').addEventListener('click', e => { if(e.target===document.getElementById('ext-modal')) document.getElementById('ext-modal').classList.remove('open'); });
+document.getElementById('ext-confirm').addEventListener('click', async () => {
+  if (!extSelectedMs) { toast('Select a time preset first', 'warn', '⚠'); return; }
+  const token = getToken(extTargetId);
+  if (!token) { toast('Owner token not found in this browser', 'error', '✕'); return; }
+  const btn = document.getElementById('ext-confirm'); btn.textContent='…'; btn.disabled=true;
+  try {
+    const r = await fetch(`${API}/file/${extTargetId}/expiry`, {
+      method: 'PATCH',
+      headers: { 'Content-Type':'application/json', 'x-owner-token': token },
+      body: JSON.stringify({ addMs: extSelectedMs })
+    });
+    const d = await r.json(); if (!r.ok) throw new Error(d.error || 'Extend failed');
+    updateFileExpiry(extTargetId, d.expiresAt);
+    toast(`✔ Expiry extended to ${new Date(d.expiresAt).toLocaleString()}`, 'success', '⏱');
+    document.getElementById('ext-modal').classList.remove('open');
+  } catch(err) { toast(err.message, 'error', '✕'); }
+  finally { btn.textContent='Extend'; btn.disabled=false; }
 });
 
 // ══════════════════════════════════════════════════════════════
 //  DECRYPT FROM LIST MODAL
 // ══════════════════════════════════════════════════════════════
-document.getElementById('dm-cancel').addEventListener('click',()=>document.getElementById('dm-modal').classList.remove('open'));
-document.getElementById('dm-modal').addEventListener('click',e=>{ if(e.target===document.getElementById('dm-modal')) document.getElementById('dm-modal').classList.remove('open'); });
-document.getElementById('dm-confirm').addEventListener('click',async()=>{
-  const pass=document.getElementById('dm-pass').value.trim();
-  const salt=document.getElementById('dm-salt').value.trim();
-  if(!pass){ toast('Enter the passphrase','warn','⚠'); return; }
+document.getElementById('dm-cancel').addEventListener('click', () => document.getElementById('dm-modal').classList.remove('open'));
+document.getElementById('dm-modal').addEventListener('click', e => { if(e.target===document.getElementById('dm-modal')) document.getElementById('dm-modal').classList.remove('open'); });
+document.getElementById('dm-confirm').addEventListener('click', async () => {
+  const pass = document.getElementById('dm-pass').value.trim();
+  const salt = document.getElementById('dm-salt').value.trim();
+  if (!pass) { toast('Enter the passphrase', 'warn', '⚠'); return; }
   document.getElementById('dm-modal').classList.remove('open');
   await fetchDecryptSave(`${API}/file/${dmTargetId}`, pass, salt, dmTargetName, 'dec');
 });
 
 // ══════════════════════════════════════════════════════════════
-//  WEBSOCKET
+//  WEBSOCKET — FIX: handle expiry_updated event
 // ══════════════════════════════════════════════════════════════
 function connectWS() {
-  wsConn=new WebSocket(WS_URL);
-  wsConn.onopen=()=>{ document.getElementById('ws-dot').classList.add('connected'); document.getElementById('ws-label').textContent='Live'; };
-  wsConn.onmessage=e=>{ try{ const m=JSON.parse(e.data); if(m.type==='file_ready') renderFile(m); if(m.type==='file_deleted'){ removeFile(m.fileId); toast('A file was removed','info','ℹ'); } }catch{} };
-  wsConn.onclose=()=>{ document.getElementById('ws-dot').classList.remove('connected'); document.getElementById('ws-label').textContent='Reconnecting…'; setTimeout(connectWS,3000); };
-  wsConn.onerror=()=>wsConn.close();
+  wsConn = new WebSocket(WS_URL);
+  wsConn.onopen = () => {
+    document.getElementById('ws-dot').classList.add('connected');
+    document.getElementById('ws-label').textContent = 'Live';
+  };
+  wsConn.onmessage = e => {
+    try {
+      const m = JSON.parse(e.data);
+      if (m.type === 'file_ready')      renderFile(m);           // won't add if already owned/rendered
+      if (m.type === 'file_deleted')  { removeFile(m.fileId); toast('A file was removed', 'info', 'ℹ'); }
+      if (m.type === 'expiry_updated')  updateFileExpiry(m.fileId, m.expiresAt); // FIX: live update
+    } catch {}
+  };
+  wsConn.onclose = () => {
+    document.getElementById('ws-dot').classList.remove('connected');
+    document.getElementById('ws-label').textContent = 'Reconnecting…';
+    setTimeout(connectWS, 3000);
+  };
+  wsConn.onerror = () => wsConn.close();
 }
 
 async function loadFiles() {
-  try { const r=await fetch(`${API}/files`); if(!r.ok) return; (await r.json()).forEach(renderFile); } catch{}
+  try {
+    const r = await fetch(`${API}/files`);
+    if (!r.ok) return;
+    (await r.json()).forEach(f => renderFile(f)); // getToken() called inside renderFile
+  } catch {}
 }
 
-loadFiles(); connectWS();
+loadFiles();
+connectWS();
 </script>
 </body>
 </html>
