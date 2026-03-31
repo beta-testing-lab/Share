@@ -1,5 +1,5 @@
 /**
- * dropshield-client.js
+ *dropshield-client.js
  *
  * Client-side encrypt → chunk upload  /  chunk download → merge → decrypt
  *
