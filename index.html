@@ -1,717 +1,1297 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DropShield — My Files</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DropShield — Secure File Vault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <style>
+/* ═══════════════════════════════════════════
+   RESET & ROOT
+═══════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:       #080810;
-  --surf:     #0e0e1a;
-  --surf2:    #13131f;
-  --border:   rgba(255,255,255,.07);
-  --border2:  rgba(255,255,255,.12);
-  --text:     #ddddf0;
-  --muted:    #6b6b90;
-  --accent:   #7c6af7;
-  --green:    #3dd68c;
-  --red:      #f06060;
-  --yellow:   #f0c060;
-  --mono:     "IBM Plex Mono", monospace;
-  --sans:     "Syne", sans-serif;
+  --bg:        #080b12;
+  --panel:     #0d1120;
+  --border:    rgba(255,255,255,0.06);
+  --border2:   rgba(255,255,255,0.12);
+  --accent:    #5b6af5;
+  --accent2:   #8b5cf6;
+  --green:     #22d3ae;
+  --amber:     #f59e0b;
+  --red:       #f43f5e;
+  --text:      #e2e8f0;
+  --muted:     #5a6578;
+  --mono:      'Space Mono', monospace;
+  --sans:      'Syne', sans-serif;
+  --radius:    10px;
+  --sidebar:   220px;
 }
 
+html, body { height: 100%; }
 body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
+  font-size: 14px;
+  overflow-x: hidden;
   min-height: 100vh;
 }
 
-/* Dot-grid bg */
+/* noise overlay */
 body::before {
-  content: "";
-  position: fixed; inset: 0; z-index: 0;
-  background-image: radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
-  background-size: 24px 24px;
-  pointer-events: none;
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0;
 }
 
-/* ── Layout ── */
-.layout { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.shell {
+  display: flex;
+  min-height: 100vh;
+  position: relative; z-index: 1;
+}
 
-/* Sidebar */
+/* ── SIDEBAR ── */
 .sidebar {
-  width: 220px; flex-shrink: 0;
-  background: var(--surf);
+  width: var(--sidebar);
+  background: var(--panel);
   border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
   padding: 28px 0;
-  display: flex; flex-direction: column;
-  position: sticky; top: 0; height: 100vh;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 100;
 }
-.logo {
-  padding: 0 20px 28px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 20px;
-}
-.logo-mark { font-size: 11px; font-family: var(--mono); color: var(--accent); letter-spacing: .2em; margin-bottom: 4px; }
-.logo-name { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
 
-.nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 20px;
-  font-size: 13px; font-family: var(--mono);
-  color: var(--muted); cursor: pointer;
-  border-left: 2px solid transparent;
-  transition: all .15s;
-  text-decoration: none;
+.logo {
+  padding: 0 24px 28px;
+  border-bottom: 1px solid var(--border);
 }
-.nav-item:hover { color: var(--text); background: var(--surf2); }
-.nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(124,106,247,.06); }
-.nav-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.logo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  padding: 4px 9px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.logo-badge::before {
+  content: '◆';
+  font-size: 8px;
+}
+.logo h1 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-family: var(--sans);
+}
+
+.nav { padding: 20px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .01em;
+  transition: all .18s;
+  border: 1px solid transparent;
+  user-select: none;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-item.active {
+  color: var(--accent);
+  background: rgba(91,106,245,.1);
+  border-color: rgba(91,106,245,.2);
+}
+.nav-icon { font-size: 16px; width: 18px; text-align: center; }
 
 .sidebar-footer {
-  margin-top: auto;
-  padding: 16px 20px;
+  padding: 16px 20px 0;
   border-top: 1px solid var(--border);
 }
-.owner-key-display {
-  font-family: var(--mono); font-size: 9px; color: var(--muted);
-  word-break: break-all; line-height: 1.6;
+.owner-key-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.owner-key-val {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  word-break: break-all;
+  line-height: 1.5;
 }
 
-/* Main */
-.main { flex: 1; padding: 36px 40px; overflow-x: hidden; }
+/* ── MAIN ── */
+.main {
+  margin-left: var(--sidebar);
+  flex: 1;
+  padding: 40px 44px;
+  max-width: calc(100vw - var(--sidebar));
+}
 
 .page-header {
-  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 36px;
+}
+.page-header h2 {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  color: #fff;
+  line-height: 1;
+}
+.page-header p {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 8px;
+  font-family: var(--mono);
+}
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ═══════════════════════════════════════════
+   STAT CARDS
+═══════════════════════════════════════════ */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
   margin-bottom: 32px;
 }
-.page-title { font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
-.page-sub   { font-size: 12px; font-family: var(--mono); color: var(--muted); margin-top: 4px; }
-
-/* Stats row */
-.stats { display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
 .stat-card {
-  flex: 1; min-width: 140px;
-  background: var(--surf);
+  background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px 18px;
-}
-.stat-label { font-size: 10px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
-.stat-val   { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
-.stat-val.green  { color: var(--green); }
-.stat-val.yellow { color: var(--yellow); }
-.stat-val.red    { color: var(--red); }
-
-/* Toolbar */
-.toolbar {
-  display: flex; align-items: center; gap: 10px;
-  margin-bottom: 16px; flex-wrap: wrap;
-}
-.search-box {
-  flex: 1; min-width: 200px;
-  background: var(--surf);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 9px 14px;
-  font-family: var(--mono); font-size: 12px;
-  color: var(--text); outline: none;
+  border-radius: var(--radius);
+  padding: 20px 20px 18px;
+  position: relative;
+  overflow: hidden;
   transition: border-color .2s;
 }
-.search-box:focus { border-color: var(--accent); }
-.search-box::placeholder { color: var(--muted); }
-.filter-btn {
-  background: var(--surf); border: 1px solid var(--border);
-  border-radius: 8px; padding: 9px 14px;
-  font-family: var(--mono); font-size: 11px; color: var(--muted);
-  cursor: pointer; transition: all .15s; white-space: nowrap;
+.stat-card:hover { border-color: var(--border2); }
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
 }
-.filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); }
-.refresh-btn {
-  background: var(--accent); border: none;
-  border-radius: 8px; padding: 9px 16px;
-  font-family: var(--mono); font-size: 11px; color: #fff;
-  cursor: pointer; transition: opacity .15s;
-}
-.refresh-btn:hover { opacity: .85; }
+.stat-card.c-total::after  { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.stat-card.c-active::after { background: var(--green); }
+.stat-card.c-expiring::after { background: var(--amber); }
+.stat-card.c-expired::after  { background: var(--red); }
+.stat-card.c-size::after    { background: linear-gradient(90deg, #38bdf8, #818cf8); }
 
-/* File table */
-.file-table-wrap {
-  background: var(--surf);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow: hidden;
+.stat-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
 }
-.file-table {
-  width: 100%; border-collapse: collapse;
+.stat-val {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
 }
-.file-table th {
-  font-family: var(--mono); font-size: 10px; text-transform: uppercase;
-  letter-spacing: .1em; color: var(--muted);
-  padding: 12px 16px; text-align: left;
-  border-bottom: 1px solid var(--border);
-  font-weight: 400;
-}
-.file-table td {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
+.stat-val.loading {
+  display: inline-block;
+  width: 40px; height: 3px;
+  background: var(--border2);
+  border-radius: 2px;
   vertical-align: middle;
 }
-.file-table tr:last-child td { border-bottom: none; }
-.file-table tbody tr { transition: background .1s; }
-.file-table tbody tr:hover { background: var(--surf2); }
 
-.file-name {
-  font-weight: 600; font-size: 14px;
-  max-width: 220px; overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap;
+/* ═══════════════════════════════════════════
+   TOOLBAR
+═══════════════════════════════════════════ */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
 }
-.file-meta {
-  font-family: var(--mono); font-size: 10px; color: var(--muted);
-  margin-top: 2px;
+.search-wrap {
+  flex: 1;
+  min-width: 200px;
+  position: relative;
 }
-.badge {
-  display: inline-flex; align-items: center;
-  font-family: var(--mono); font-size: 10px;
-  padding: 3px 8px; border-radius: 20px;
-  font-weight: 500; letter-spacing: .04em;
+.search-wrap .ico {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 14px;
+  pointer-events: none;
 }
-.badge.active  { background: rgba(61,214,140,.1);  color: var(--green);  border: 1px solid rgba(61,214,140,.2); }
-.badge.expired { background: rgba(240,96,96,.1);   color: var(--red);    border: 1px solid rgba(240,96,96,.2); }
-.badge.soon    { background: rgba(240,192,96,.1);  color: var(--yellow); border: 1px solid rgba(240,192,96,.2); }
-
-.expiry-cell { font-family: var(--mono); font-size: 11px; }
-.expiry-time { color: var(--text); }
-.expiry-rel  { color: var(--muted); font-size: 10px; margin-top: 2px; }
-
-/* Action buttons */
-.actions { display: flex; gap: 6px; align-items: center; }
-.act-btn {
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 5px 10px;
-  font-family: var(--mono); font-size: 10px;
-  color: var(--muted); cursor: pointer;
-  transition: all .15s; white-space: nowrap;
-}
-.act-btn:hover           { border-color: var(--accent); color: var(--accent); }
-.act-btn.danger:hover    { border-color: var(--red);    color: var(--red); }
-.act-btn.copy:hover      { border-color: var(--green);  color: var(--green); }
-.act-btn:disabled        { opacity: .35; cursor: not-allowed; }
-
-/* ── Expiry modal ── */
-.modal-backdrop {
-  position: fixed; inset: 0; z-index: 100;
-  background: rgba(0,0,0,.7);
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none; transition: opacity .2s;
-}
-.modal-backdrop.open { opacity: 1; pointer-events: all; }
-.modal {
-  background: var(--surf2);
-  border: 1px solid var(--border2);
-  border-radius: 16px;
-  padding: 28px;
-  width: 100%; max-width: 440px;
-  transform: translateY(12px); transition: transform .2s;
-}
-.modal-backdrop.open .modal { transform: translateY(0); }
-.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-.modal-sub   { font-size: 12px; font-family: var(--mono); color: var(--muted); margin-bottom: 24px; }
-
-.expiry-presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-.preset-btn {
-  background: var(--surf);
-  border: 1px solid var(--border);
-  border-radius: 8px; padding: 7px 14px;
-  font-family: var(--mono); font-size: 11px;
-  color: var(--muted); cursor: pointer;
-  transition: all .15s;
-}
-.preset-btn:hover, .preset-btn.sel {
-  border-color: var(--accent); color: var(--accent);
-  background: rgba(124,106,247,.08);
-}
-
-.expiry-label {
-  font-family: var(--mono); font-size: 11px; color: var(--muted);
-  margin-bottom: 6px;
-}
-.expiry-input {
+.search-input {
   width: 100%;
-  background: var(--surf);
+  background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 8px; padding: 10px 14px;
-  font-family: var(--mono); font-size: 12px;
-  color: var(--text); outline: none;
-  transition: border-color .2s; margin-bottom: 8px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  padding: 10px 14px 10px 38px;
+  border-radius: var(--radius);
+  outline: none;
+  transition: border-color .18s;
 }
-.expiry-input:focus { border-color: var(--accent); }
-.expiry-preview {
-  font-family: var(--mono); font-size: 11px; color: var(--muted);
-  margin-bottom: 20px;
-}
-.expiry-preview span { color: var(--accent); }
+.search-input::placeholder { color: var(--muted); }
+.search-input:focus { border-color: var(--accent); }
 
-.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-.btn-cancel {
+.filter-btns { display: flex; gap: 6px; }
+.filter-btn {
+  padding: 9px 16px;
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--border);
   background: transparent;
-  border: 1px solid var(--border2);
-  border-radius: 8px; padding: 9px 18px;
-  font-family: var(--mono); font-size: 12px;
-  color: var(--muted); cursor: pointer;
+  color: var(--muted);
+  cursor: pointer;
   transition: all .15s;
 }
-.btn-cancel:hover { color: var(--text); border-color: var(--border2); }
-.btn-save {
+.filter-btn:hover { color: var(--text); border-color: var(--border2); }
+.filter-btn.active {
   background: var(--accent);
-  border: none; border-radius: 8px;
-  padding: 9px 20px;
-  font-family: var(--mono); font-size: 12px;
-  color: #fff; cursor: pointer;
-  transition: opacity .15s;
+  border-color: var(--accent);
+  color: #fff;
 }
-.btn-save:hover    { opacity: .85; }
-.btn-save:disabled { opacity: .4; cursor: not-allowed; }
 
-/* ── Delete confirm ── */
-.delete-modal .modal-title { color: var(--red); }
-.btn-delete {
-  background: var(--red);
-  border: none; border-radius: 8px;
-  padding: 9px 20px;
-  font-family: var(--mono); font-size: 12px;
-  color: #fff; cursor: pointer;
-  transition: opacity .15s;
+.btn-refresh {
+  display: flex; align-items: center; gap: 7px;
+  padding: 9px 18px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .15s, transform .12s;
 }
-.btn-delete:hover    { opacity: .85; }
-.btn-delete:disabled { opacity: .4; cursor: not-allowed; }
-
-/* Empty / loading */
-.empty-state {
-  text-align: center; padding: 64px 24px;
-  font-family: var(--mono); font-size: 13px; color: var(--muted);
-}
-.empty-icon { font-size: 32px; margin-bottom: 12px; opacity: .4; }
-
-.spinner {
-  width: 18px; height: 18px;
-  border: 2px solid var(--border); border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin .7s linear infinite;
-  display: inline-block; vertical-align: middle;
-}
+.btn-refresh:hover { opacity: .9; transform: translateY(-1px); }
+.btn-refresh:active { transform: scale(.97); }
+.btn-refresh.spinning .spin-icon { animation: spin .6s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.toast {
-  position: fixed; bottom: 24px; right: 24px; z-index: 200;
-  background: var(--surf2); border: 1px solid var(--border2);
-  border-radius: 10px; padding: 12px 18px;
-  font-family: var(--mono); font-size: 12px;
-  transform: translateY(20px); opacity: 0;
-  transition: all .25s; pointer-events: none;
+/* ═══════════════════════════════════════════
+   FILE TABLE
+═══════════════════════════════════════════ */
+.table-wrap {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
-.toast.show { transform: translateY(0); opacity: 1; }
-.toast.ok  { border-color: rgba(61,214,140,.4); color: var(--green); }
-.toast.err { border-color: rgba(240,96,96,.4);  color: var(--red); }
+.table-head {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr 1.4fr .9fr 1.6fr;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.file-rows { min-height: 180px; }
+
+.file-row {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr 1.4fr .9fr 1.6fr;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  transition: background .15s;
+  animation: rowIn .25s ease both;
+}
+.file-row:last-child { border-bottom: none; }
+.file-row:hover { background: rgba(255,255,255,.025); }
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.file-name-cell { display: flex; align-items: center; gap: 10px; }
+.file-icon {
+  width: 34px; height: 34px;
+  border-radius: 7px;
+  background: rgba(91,106,245,.15);
+  border: 1px solid rgba(91,106,245,.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.file-name { font-weight: 600; font-size: 13px; color: var(--text); line-height: 1.2; }
+.file-size { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 9px;
+  border-radius: 5px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+.badge::before { content: '●'; font-size: 7px; }
+.badge-active  { background: rgba(34,211,174,.1); color: var(--green); border: 1px solid rgba(34,211,174,.2); }
+.badge-expiring{ background: rgba(245,158,11,.1); color: var(--amber); border: 1px solid rgba(245,158,11,.2); }
+.badge-expired { background: rgba(244,63,94,.1);  color: var(--red);   border: 1px solid rgba(244,63,94,.2); }
+
+.expiry-cell { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.expiry-cell .days { color: var(--text); font-weight: 700; font-size: 13px; }
+
+.chunks-cell { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+.action-btns { display: flex; gap: 6px; }
+.action-btn {
+  padding: 6px 11px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--sans);
+  cursor: pointer;
+  transition: all .15s;
+  border: 1px solid transparent;
+}
+.btn-copy  { background: rgba(91,106,245,.15); color: var(--accent); border-color: rgba(91,106,245,.25); }
+.btn-copy:hover  { background: rgba(91,106,245,.28); }
+.btn-delete{ background: rgba(244,63,94,.1); color: var(--red); border-color: rgba(244,63,94,.2); }
+.btn-delete:hover{ background: rgba(244,63,94,.22); }
+.btn-expiry{ background: rgba(245,158,11,.1); color: var(--amber); border-color: rgba(245,158,11,.2); }
+.btn-expiry:hover{ background: rgba(245,158,11,.22); }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 10px;
+  color: var(--muted);
+}
+.empty-state .big-icon { font-size: 40px; opacity: .3; }
+.empty-state p { font-size: 14px; font-family: var(--mono); }
+
+.spinner-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+}
+.spinner {
+  width: 28px; height: 28px;
+  border: 3px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+/* ═══════════════════════════════════════════
+   UPLOAD PAGE
+═══════════════════════════════════════════ */
+.upload-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 28px;
+  align-items: start;
+}
+
+.drop-zone {
+  border: 2px dashed var(--border2);
+  border-radius: 14px;
+  padding: 64px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: var(--panel);
+  position: relative;
+  overflow: hidden;
+}
+.drop-zone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(91,106,245,.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.drop-zone:hover, .drop-zone.dragover {
+  border-color: var(--accent);
+  background: rgba(91,106,245,.04);
+}
+.drop-zone.dragover { transform: scale(1.01); }
+.drop-icon { font-size: 48px; margin-bottom: 16px; display: block; }
+.drop-title { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+.drop-sub { color: var(--muted); font-size: 13px; line-height: 1.5; font-family: var(--mono); }
+.drop-sub span { color: var(--accent); cursor: pointer; }
+.file-input { display: none; }
+
+/* progress */
+.upload-progress-wrap { margin-top: 24px; display: none; }
+.upload-progress-wrap.active { display: block; }
+.progress-track {
+  height: 4px;
+  background: var(--border2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 4px;
+  width: 0%;
+  transition: width .3s;
+}
+.progress-label { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+/* upload queue */
+.upload-queue { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+.queue-item {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.queue-icon { font-size: 22px; }
+.queue-info { flex: 1; }
+.queue-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.queue-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.queue-status { font-family: var(--mono); font-size: 11px; font-weight: 700; }
+.queue-status.done    { color: var(--green); }
+.queue-status.fail    { color: var(--red); }
+.queue-status.pending { color: var(--amber); }
+.queue-status.uploading { color: var(--accent); }
+
+/* settings panel */
+.settings-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.settings-panel h3 {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .01em;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+.field { margin-bottom: 18px; }
+.field label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+.field select, .field input[type="number"] {
+  width: 100%;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 7px;
+  outline: none;
+  transition: border-color .18s;
+  appearance: none;
+}
+.field select:focus, .field input[type="number"]:focus { border-color: var(--accent); }
+.field select option { background: #0d1120; }
+
+.btn-upload-start {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all .18s;
+  margin-top: 8px;
+}
+.btn-upload-start:hover { opacity: .9; transform: translateY(-1px); }
+.btn-upload-start:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 32px;
+  width: 420px;
+  max-width: 90vw;
+  transform: scale(.95) translateY(10px);
+  transition: transform .2s;
+}
+.modal-overlay.open .modal { transform: none; }
+.modal h3 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+.modal p  { color: var(--muted); font-size: 13px; margin-bottom: 22px; font-family: var(--mono); }
+.modal .field { margin-bottom: 14px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+.btn-cancel {
+  padding: 10px 18px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-cancel:hover { color: var(--text); }
+.btn-confirm {
+  padding: 10px 22px;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.btn-confirm:hover { opacity: .85; }
+.btn-confirm.danger { background: var(--red); }
+
+/* toast */
+.toast-container { position: fixed; bottom: 28px; right: 28px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  padding: 12px 18px;
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+  animation: toastIn .2s ease;
+  min-width: 220px;
+  display: flex; align-items: center; gap: 9px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+}
+.toast-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.toast.success .toast-dot { background: var(--green); }
+.toast.error   .toast-dot { background: var(--red); }
+.toast.info    .toast-dot { background: var(--accent); }
+@keyframes toastIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform:none; } }
+
+/* ws indicator */
+.ws-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  display: inline-block;
+  margin-right: 6px;
+  transition: background .4s;
+}
+.ws-dot.connected { background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse {
+  0%,100% { opacity:1; }
+  50%      { opacity:.4; }
+}
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .stat-grid { grid-template-columns: repeat(3,1fr); }
+  .upload-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 800px) {
+  .main { padding: 24px 18px; }
+  .table-head, .file-row { grid-template-columns: 2fr 1fr 1fr; }
+  .table-head .col-chunks, .file-row .col-chunks,
+  .table-head .col-expiry, .file-row .col-expiry { display: none; }
+}
 </style>
 </head>
 <body>
-<div class="layout">
 
-  <!-- Sidebar -->
+<!-- ═══════════════ SHELL ═══════════════ -->
+<div class="shell">
+
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="logo">
-      <div class="logo-mark">◈ DROPSHIELD</div>
-      <div class="logo-name">Dashboard</div>
+      <div class="logo-badge">Secure</div>
+      <h1>DropShield</h1>
     </div>
-    <a class="nav-item" href="index.html"><span class="nav-dot"></span>Upload</a>
-    <a class="nav-item active" href="dashboard.html"><span class="nav-dot"></span>My Files</a>
-
+    <nav class="nav">
+      <div class="nav-item" data-page="upload" onclick="switchPage('upload')">
+        <span class="nav-icon">⬆</span> Upload
+      </div>
+      <div class="nav-item active" data-page="files" onclick="switchPage('files')">
+        <span class="nav-icon">📂</span> My Files
+      </div>
+    </nav>
     <div class="sidebar-footer">
-      <div class="owner-key-display" id="ownerKeyDisplay">Owner key: loading…</div>
+      <div style="display:flex;align-items:center;margin-bottom:8px;">
+        <span class="ws-dot" id="wsDot"></span>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;" id="wsLabel">Connecting…</span>
+      </div>
+      <div class="owner-key-label">Owner Key</div>
+      <div class="owner-key-val" id="ownerKeyDisp"></div>
     </div>
   </aside>
 
-  <!-- Main -->
+  <!-- MAIN -->
   <main class="main">
-    <div class="page-header">
-      <div>
-        <div class="page-title">My Files</div>
-        <div class="page-sub" id="lastRefreshed">Loading…</div>
+
+    <!-- ═══ MY FILES PAGE ═══ -->
+    <div class="page active" id="page-files">
+      <div class="page-header">
+        <h2>My Files</h2>
+        <p id="filesSubtitle">Loading your secure vault…</p>
+      </div>
+
+      <!-- stat cards -->
+      <div class="stat-grid">
+        <div class="stat-card c-total">
+          <div class="stat-label">Total Uploads</div>
+          <div class="stat-val loading" id="statTotal"></div>
+        </div>
+        <div class="stat-card c-active">
+          <div class="stat-label">Active</div>
+          <div class="stat-val loading" id="statActive"></div>
+        </div>
+        <div class="stat-card c-expiring">
+          <div class="stat-label">Expiring Soon</div>
+          <div class="stat-val loading" id="statExpiring"></div>
+        </div>
+        <div class="stat-card c-expired">
+          <div class="stat-label">Expired</div>
+          <div class="stat-val loading" id="statExpired"></div>
+        </div>
+        <div class="stat-card c-size">
+          <div class="stat-label">Total Size</div>
+          <div class="stat-val loading" id="statSize"></div>
+        </div>
+      </div>
+
+      <!-- toolbar -->
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="ico">🔍</span>
+          <input class="search-input" id="searchInput" placeholder="Search files…" oninput="renderTable()"/>
+        </div>
+        <div class="filter-btns">
+          <button class="filter-btn active" data-filter="all"      onclick="setFilter('all')">All</button>
+          <button class="filter-btn"        data-filter="active"   onclick="setFilter('active')">Active</button>
+          <button class="filter-btn"        data-filter="expired"  onclick="setFilter('expired')">Expired</button>
+        </div>
+        <button class="btn-refresh" id="refreshBtn" onclick="loadFiles()">
+          <span class="spin-icon">↻</span> Refresh
+        </button>
+      </div>
+
+      <!-- table -->
+      <div class="table-wrap">
+        <div class="table-head">
+          <div>File</div>
+          <div>Status</div>
+          <div>Expiry</div>
+          <div class="col-chunks">Chunks</div>
+          <div>Actions</div>
+        </div>
+        <div class="file-rows" id="fileRows">
+          <div class="spinner-wrap"><div class="spinner"></div></div>
+        </div>
       </div>
     </div>
 
-    <!-- Stats -->
-    <div class="stats">
-      <div class="stat-card">
-        <div class="stat-label">Total uploads</div>
-        <div class="stat-val" id="statTotal">—</div>
+    <!-- ═══ UPLOAD PAGE ═══ -->
+    <div class="page" id="page-upload">
+      <div class="page-header">
+        <h2>Upload File</h2>
+        <p>Encrypted chunked upload to secure cloud storage</p>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Active</div>
-        <div class="stat-val green" id="statActive">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Expiring soon</div>
-        <div class="stat-val yellow" id="statSoon">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Expired</div>
-        <div class="stat-val red" id="statExpired">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Total size</div>
-        <div class="stat-val" id="statSize">—</div>
+
+      <div class="upload-layout">
+        <div>
+          <!-- drop zone -->
+          <div class="drop-zone" id="dropZone"
+               ondragover="handleDragOver(event)"
+               ondragleave="handleDragLeave(event)"
+               ondrop="handleDrop(event)"
+               onclick="document.getElementById('fileInput').click()">
+            <span class="drop-icon">🔒</span>
+            <div class="drop-title">Drop files to encrypt & upload</div>
+            <div class="drop-sub">
+              Drag & drop or <span>browse files</span><br/>
+              Files are chunked (≤9.5 MB/chunk) and stored encrypted
+            </div>
+            <input type="file" id="fileInput" class="file-input" multiple onchange="handleFileSelect(event)"/>
+          </div>
+
+          <!-- progress -->
+          <div class="upload-progress-wrap" id="uploadProgressWrap">
+            <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+            <div class="progress-label" id="progressLabel">Preparing…</div>
+          </div>
+
+          <!-- queue -->
+          <div class="upload-queue" id="uploadQueue"></div>
+        </div>
+
+        <!-- settings -->
+        <div class="settings-panel">
+          <h3>Upload Settings</h3>
+          <div class="field">
+            <label>Expiry Duration</label>
+            <select id="expiryPreset" onchange="updateExpiryCustom()">
+              <option value="300000">5 Minutes</option>
+              <option value="3600000">1 Hour</option>
+              <option value="86400000">1 Day</option>
+              <option value="604800000" selected>7 Days (default)</option>
+              <option value="1296000000">15 Days</option>
+              <option value="2592000000">30 Days</option>
+              <option value="custom">Custom…</option>
+            </select>
+          </div>
+          <div class="field" id="customExpiryField" style="display:none;">
+            <label>Custom (minutes)</label>
+            <input type="number" id="customExpiryMin" min="5" max="43200" value="1440" placeholder="Minutes"/>
+          </div>
+          <div class="field">
+            <label>Chunk Size</label>
+            <select id="chunkSizeSel">
+              <option value="2097152">2 MB</option>
+              <option value="5242880">5 MB</option>
+              <option value="9961472" selected>9.5 MB (max)</option>
+            </select>
+          </div>
+          <button class="btn-upload-start" id="uploadStartBtn" onclick="startUploads()" disabled>
+            Select files first
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <input class="search-box" id="searchBox" placeholder="Search files…" oninput="renderTable()">
-      <button class="filter-btn active" id="filterAll"    onclick="setFilter('all')">All</button>
-      <button class="filter-btn"        id="filterActive" onclick="setFilter('active')">Active</button>
-      <button class="filter-btn"        id="filterExpired" onclick="setFilter('expired')">Expired</button>
-      <button class="refresh-btn" onclick="loadFiles()">↻ Refresh</button>
-    </div>
-
-    <!-- Table -->
-    <div class="file-table-wrap">
-      <table class="file-table">
-        <thead>
-          <tr>
-            <th>File</th>
-            <th>Status</th>
-            <th>Expiry</th>
-            <th>Chunks</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="fileTableBody">
-          <tr><td colspan="5"><div class="empty-state"><div class="spinner"></div></div></td></tr>
-        </tbody>
-      </table>
-    </div>
   </main>
 </div>
 
-<!-- Expiry Modal -->
-<div class="modal-backdrop" id="expiryModal">
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- Delete confirm -->
+<div class="modal-overlay" id="deleteModal">
   <div class="modal">
-    <div class="modal-title">Edit Expiry</div>
-    <div class="modal-sub" id="expiryModalSub">Set a new expiry for this file.</div>
-
-    <div class="expiry-presets">
-      <button class="preset-btn" onclick="applyPreset(1)">1 day</button>
-      <button class="preset-btn" onclick="applyPreset(3)">3 days</button>
-      <button class="preset-btn" onclick="applyPreset(7)">7 days</button>
-      <button class="preset-btn" onclick="applyPreset(14)">14 days</button>
-      <button class="preset-btn" onclick="applyPreset(30)">30 days</button>
-    </div>
-
-    <div class="expiry-label">Or pick a specific date & time</div>
-    <input class="expiry-input" type="datetime-local" id="expiryDateInput" oninput="updatePreview()">
-    <div class="expiry-preview" id="expiryPreview"> </div>
-
+    <h3>🗑 Delete File</h3>
+    <p>This will permanently remove all chunks from Cloudinary and cannot be undone.</p>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeExpiryModal()">Cancel</button>
-      <button class="btn-save"   id="btnSaveExpiry" onclick="saveExpiry()">Save expiry</button>
+      <button class="btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
+      <button class="btn-confirm danger" onclick="confirmDelete()">Delete Permanently</button>
     </div>
   </div>
 </div>
 
-<!-- Delete Modal -->
-<div class="modal-backdrop delete-modal" id="deleteModal">
+<!-- Expiry editor -->
+<div class="modal-overlay" id="expiryModal">
   <div class="modal">
-    <div class="modal-title">Delete permanently?</div>
-    <div class="modal-sub" id="deleteModalSub">This will remove all chunks from Cloudinary. This cannot be undone.</div>
+    <h3>⏱ Edit Expiry</h3>
+    <p id="expiryModalSub">Set a new expiry time for this file.</p>
+    <div class="field">
+      <label>New Expiry Date & Time</label>
+      <input type="datetime-local" id="expiryDateInput"
+             style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:7px;outline:none;border-color:var(--border);"/>
+    </div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
-      <button class="btn-delete" id="btnConfirmDelete" onclick="confirmDelete()">Delete forever</button>
+      <button class="btn-cancel" onclick="closeModal('expiryModal')">Cancel</button>
+      <button class="btn-confirm" onclick="confirmExpiry()">Update Expiry</button>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
+<!-- Toasts -->
+<div class="toast-container" id="toastContainer"></div>
 
-<script type="module">
-import {
-  getOrCreateOwnerKey,
-  fetchMyFiles,
-  setExpiry,
-  deleteFile,
-  SERVER,
-} from "./dropshield-client.js";
+<script>
+// ═══════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════
+const API  = "https://file-share-unique.onrender.com";
+const WS   = "wss://file-share-unique.onrender.com";
 
-// ── State ──────────────────────────────────────
+// OwnerKey persisted in localStorage
+let OWNER_KEY = localStorage.getItem("dropshield_owner_key");
+if (!OWNER_KEY) {
+  OWNER_KEY = [...crypto.getRandomValues(new Uint8Array(16))]
+    .map(b => b.toString(16).padStart(2,"0")).join("");
+  localStorage.setItem("dropshield_owner_key", OWNER_KEY);
+}
+document.getElementById("ownerKeyDisp").textContent =
+  OWNER_KEY.slice(0,8) + "…" + OWNER_KEY.slice(-6);
+
+// OwnerTokens stored by fileId for deletion/expiry actions
+const ownerTokens = JSON.parse(localStorage.getItem("dropshield_tokens") || "{}");
+function saveTokens() { localStorage.setItem("dropshield_tokens", JSON.stringify(ownerTokens)); }
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
 let allFiles   = [];
 let filterMode = "all";
-let editingFileId  = null;
-let deletingFileId = null;
+let pendingDeleteId = null;
+let pendingExpiryId = null;
+let wsReady    = false;
 
-// ── Init ──────────────────────────────────────
-const ownerKey = getOrCreateOwnerKey();
-document.getElementById("ownerKeyDisplay").textContent =
-  "Key: " + ownerKey.slice(0, 8) + "…" + ownerKey.slice(-4);
+// ═══════════════════════════════════════════
+// WEBSOCKET
+// ═══════════════════════════════════════════
+function connectWS() {
+  const ws = new WebSocket(WS);
+  ws.onopen = () => {
+    wsReady = true;
+    document.getElementById("wsDot").classList.add("connected");
+    document.getElementById("wsLabel").textContent = "Live";
+  };
+  ws.onclose = () => {
+    wsReady = false;
+    document.getElementById("wsDot").classList.remove("connected");
+    document.getElementById("wsLabel").textContent = "Reconnecting…";
+    setTimeout(connectWS, 3000);
+  };
+  ws.onmessage = e => {
+    try {
+      const msg = JSON.parse(e.data);
+      if (msg.type === "file_ready") {
+        const idx = allFiles.findIndex(f => f.fileId === msg.fileId);
+        if (idx >= 0) allFiles[idx] = msg; else allFiles.unshift(msg);
+        renderTable(); updateStats();
+      } else if (msg.type === "file_deleted") {
+        allFiles = allFiles.filter(f => f.fileId !== msg.fileId);
+        renderTable(); updateStats();
+      } else if (msg.type === "expiry_updated") {
+        const f = allFiles.find(f => f.fileId === msg.fileId);
+        if (f) { f.expiresAt = msg.expiresAt; f.expired = msg.expiresAt < Date.now(); renderTable(); updateStats(); }
+      }
+    } catch {}
+  };
+}
+connectWS();
 
-await loadFiles();
-
-// ── Load ──────────────────────────────────────
-window.loadFiles = async function() {
-  document.getElementById("lastRefreshed").textContent = "Refreshing…";
-  try {
-    allFiles = await fetchMyFiles();
-    renderStats();
-    renderTable();
-    document.getElementById("lastRefreshed").textContent =
-      "Last refreshed: " + new Date().toLocaleTimeString();
-  } catch (err) {
-    showToast("Failed to load: " + err.message, "err");
-    document.getElementById("lastRefreshed").textContent = "Error loading";
-  }
-};
-
-// ── Stats ──────────────────────────────────────
-function renderStats() {
-  const now      = Date.now();
-  const active   = allFiles.filter(f => !f.expired);
-  const expired  = allFiles.filter(f => f.expired);
-  const soon     = active.filter(f => f.expiresAt - now < 2 * 86400000);
-  const totalSz  = allFiles.reduce((s, f) => s + (f.size || 0), 0);
-
-  document.getElementById("statTotal").textContent   = allFiles.length;
-  document.getElementById("statActive").textContent  = active.length;
-  document.getElementById("statSoon").textContent    = soon.length;
-  document.getElementById("statExpired").textContent = expired.length;
-  document.getElementById("statSize").textContent    = fmtSize(totalSz);
+// ═══════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════
+function switchPage(name) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById("page-" + name).classList.add("active");
+  document.querySelector(`.nav-item[data-page="${name}"]`).classList.add("active");
+  if (name === "files") loadFiles();
 }
 
-// ── Table ──────────────────────────────────────
-function renderTable() {
-  const q      = document.getElementById("searchBox").value.toLowerCase();
-  const files  = allFiles
-    .filter(f => {
-      if (filterMode === "active")  return !f.expired;
-      if (filterMode === "expired") return f.expired;
-      return true;
-    })
-    .filter(f => !q || f.name.toLowerCase().includes(q));
+// ═══════════════════════════════════════════
+// LOAD FILES
+// ═══════════════════════════════════════════
+async function loadFiles() {
+  const btn = document.getElementById("refreshBtn");
+  btn.classList.add("spinning");
+  document.getElementById("fileRows").innerHTML = `<div class="spinner-wrap"><div class="spinner"></div></div>`;
+  try {
+    const r = await fetch(`${API}/owner/files`, { headers: { "x-owner-key": OWNER_KEY } });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    allFiles = await r.json();
+    document.getElementById("filesSubtitle").textContent =
+      `${allFiles.length} file${allFiles.length !== 1 ? "s" : ""} in your vault`;
+    renderTable();
+    updateStats();
+  } catch (err) {
+    showToast("Failed to load files: " + err.message, "error");
+    document.getElementById("fileRows").innerHTML = `<div class="empty-state"><div class="big-icon">⚠️</div><p>Could not reach server</p></div>`;
+  } finally { btn.classList.remove("spinning"); }
+}
+loadFiles();
 
-  const tbody = document.getElementById("fileTableBody");
-  if (!files.length) {
-    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">
-      <div class="empty-icon">◻</div>No files found.</div></td></tr>`;
+// ═══════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════
+function updateStats() {
+  const now = Date.now();
+  const active   = allFiles.filter(f => !f.expired && f.expiresAt > now);
+  const expiring = active.filter(f => (f.expiresAt - now) < 2*24*60*60*1000);
+  const expired  = allFiles.filter(f => f.expired || f.expiresAt <= now);
+  const totalSz  = allFiles.reduce((s, f) => s + (f.size||0), 0);
+
+  function set(id, val) {
+    const el = document.getElementById(id);
+    el.classList.remove("loading");
+    el.textContent = val;
+  }
+  set("statTotal",    allFiles.length);
+  set("statActive",   active.length);
+  set("statExpiring", expiring.length);
+  set("statExpired",  expired.length);
+  set("statSize",     fmtBytes(totalSz));
+}
+
+// ═══════════════════════════════════════════
+// RENDER TABLE
+// ═══════════════════════════════════════════
+function setFilter(f) {
+  filterMode = f;
+  document.querySelectorAll(".filter-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.filter === f);
+  });
+  renderTable();
+}
+
+function renderTable() {
+  const q = document.getElementById("searchInput").value.toLowerCase().trim();
+  const now = Date.now();
+
+  let rows = allFiles.filter(f => {
+    if (q && !f.name.toLowerCase().includes(q)) return false;
+    if (filterMode === "active")  return !f.expired && f.expiresAt > now;
+    if (filterMode === "expired") return f.expired  || f.expiresAt <= now;
+    return true;
+  });
+
+  const container = document.getElementById("fileRows");
+  if (!rows.length) {
+    container.innerHTML = `<div class="empty-state"><div class="big-icon">📭</div><p>No files found</p></div>`;
     return;
   }
 
-  tbody.innerHTML = files.map(f => {
-    const now        = Date.now();
-    const msLeft     = f.expiresAt - now;
-    const isExpired  = f.expired;
-    const isSoon     = !isExpired && msLeft < 2 * 86400000;
-    const badge      = isExpired
-      ? `<span class="badge expired">Expired</span>`
-      : isSoon
-        ? `<span class="badge soon">Expiring soon</span>`
-        : `<span class="badge active">Active</span>`;
+  container.innerHTML = rows.map((f, i) => {
+    const isExpired = f.expired || f.expiresAt <= now;
+    const isExpiring = !isExpired && (f.expiresAt - now) < 2*24*60*60*1000;
+    const badgeCls = isExpired ? "badge-expired" : isExpiring ? "badge-expiring" : "badge-active";
+    const badgeTxt = isExpired ? "EXPIRED" : isExpiring ? "EXPIRING" : "ACTIVE";
+    const expiresDate = new Date(f.expiresAt).toLocaleDateString(undefined, { month:"short", day:"numeric", year:"numeric" });
+    const daysLeft = Math.max(0, Math.ceil((f.expiresAt - now) / 86400000));
 
-    const expiryStr  = new Date(f.expiresAt).toLocaleString();
-    const relStr     = isExpired
-      ? `Expired ${timeAgo(f.expiresAt)}`
-      : `In ${msToHuman(msLeft)}`;
-
-    const shareUrl = f.url;   // key fragment is client-only, not stored on server
-
-    return `<tr>
-      <td>
-        <div class="file-name" title="${esc(f.name)}">${esc(f.name)}</div>
-        <div class="file-meta">${fmtSize(f.size)} · ${f.mimeType || "unknown"}</div>
-      </td>
-      <td>${badge}</td>
-      <td>
-        <div class="expiry-cell">
-          <div class="expiry-time">${expiryStr}</div>
-          <div class="expiry-rel">${relStr}</div>
+    return `<div class="file-row" style="animation-delay:${i*30}ms">
+      <div class="file-name-cell">
+        <div class="file-icon">${fileEmoji(f.mimeType)}</div>
+        <div>
+          <div class="file-name">${esc(f.name)}</div>
+          <div class="file-size">${fmtBytes(f.size)}</div>
         </div>
-      </td>
-      <td><span style="font-family:var(--mono);font-size:11px;">${f.totalChunks} × 9 MB</span></td>
-      <td>
-        <div class="actions">
-          <button class="act-btn copy" onclick="copyFileUrl('${f.fileId}','${shareUrl}')">Copy URL</button>
-          <button class="act-btn" onclick="openExpiryModal('${f.fileId}',${f.expiresAt},${f.createdAt},'${esc(f.name)}')">Expiry</button>
-          <button class="act-btn danger" onclick="openDeleteModal('${f.fileId}','${esc(f.name)}')">Delete</button>
-        </div>
-      </td>
-    </tr>`;
+      </div>
+      <div><span class="badge ${badgeCls}">${badgeTxt}</span></div>
+      <div class="expiry-cell">
+        ${isExpired ? `<span style="color:var(--red)">Expired</span>` :
+          `<span class="days">${daysLeft}d</span> left<br/><span style="font-size:10px">${expiresDate}</span>`}
+      </div>
+      <div class="chunks-cell col-chunks">${f.totalChunks || (f.chunkIds||[]).length}</div>
+      <div class="action-btns">
+        <button class="action-btn btn-copy" onclick="copyLink('${f.fileId}')">Copy Link</button>
+        ${!isExpired ? `<button class="action-btn btn-expiry" onclick="openExpiryModal('${f.fileId}', ${f.expiresAt})">Expiry</button>` : ''}
+        <button class="action-btn btn-delete" onclick="openDeleteModal('${f.fileId}')">Delete</button>
+      </div>
+    </div>`;
   }).join("");
 }
 
-// ── Filter ──────────────────────────────────────
-window.setFilter = function(mode) {
-  filterMode = mode;
-  ["all","active","expired"].forEach(m => {
-    document.getElementById("filter" + m.charAt(0).toUpperCase() + m.slice(1))
-      .classList.toggle("active", m === mode);
-  });
-  renderTable();
-};
+// ═══════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════
+function copyLink(fileId) {
+  const url = `${API}/file/${fileId}`;
+  navigator.clipboard.writeText(url).then(() => showToast("Link copied to clipboard!", "success"));
+}
 
-// ── Copy URL ──────────────────────────────────────
-// Note: the #key fragment is NOT stored on server. If the user didn't
-// save it at upload time, they can still share the bare URL (recipient
-// needs the key separately). We store ownerTokens in localStorage.
-window.copyFileUrl = function(fileId, url) {
-  navigator.clipboard.writeText(url).then(() => showToast("URL copied!", "ok"));
-};
-
-// ── Expiry Modal ──────────────────────────────────────
-window.openExpiryModal = function(fileId, expiresAt, createdAt, name) {
-  editingFileId = fileId;
-  document.getElementById("expiryModalSub").textContent =
-    `Editing: ${name}  ·  Created ${new Date(createdAt).toLocaleDateString()}`;
-
-  // Set datetime-local input to current expiry
-  const dt = new Date(expiresAt);
-  const localIso = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000)
-    .toISOString().slice(0, 16);
-  document.getElementById("expiryDateInput").value = localIso;
-
-  // Bounds: min = createdAt + 5min, max = createdAt + 30days
-  const minDt = new Date(createdAt + 5 * 60 * 1000);
-  const maxDt = new Date(createdAt + 30 * 24 * 60 * 60 * 1000);
-  const toLocal = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0,16);
-  document.getElementById("expiryDateInput").min = toLocal(minDt);
-  document.getElementById("expiryDateInput").max = toLocal(maxDt);
-
-  updatePreview();
-  document.getElementById("expiryModal").classList.add("open");
-};
-window.closeExpiryModal = function() {
-  document.getElementById("expiryModal").classList.remove("open");
-  editingFileId = null;
-};
-
-window.applyPreset = function(days) {
-  const now = new Date();
-  const dt  = new Date(now.getTime() + days * 86400000);
-  const localIso = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0,16);
-  document.getElementById("expiryDateInput").value = localIso;
-  document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("sel"));
-  event.target.classList.add("sel");
-  updatePreview();
-};
-
-window.updatePreview = function() {
-  const val = document.getElementById("expiryDateInput").value;
-  const preview = document.getElementById("expiryPreview");
-  if (!val) { preview.innerHTML = " "; return; }
-  const ts = new Date(val).getTime();
-  const diff = ts - Date.now();
-  const dir  = diff > 0 ? "in " + msToHuman(diff) : timeAgo(ts) + " ago (already past)";
-  preview.innerHTML = `New expiry: <span>${new Date(val).toLocaleString()}</span> — ${dir}`;
-};
-
-window.saveExpiry = async function() {
-  const val = document.getElementById("expiryDateInput").value;
-  if (!val || !editingFileId) return;
-  const ts  = new Date(val).getTime();
-  const btn = document.getElementById("btnSaveExpiry");
-  btn.disabled = true; btn.textContent = "Saving…";
-  try {
-    await setExpiry(editingFileId, ts);
-    showToast("Expiry updated", "ok");
-    closeExpiryModal();
-    await loadFiles();
-  } catch (err) {
-    showToast("Error: " + err.message, "err");
-  } finally {
-    btn.disabled = false; btn.textContent = "Save expiry";
-  }
-};
-
-// ── Delete Modal ──────────────────────────────────────
-window.openDeleteModal = function(fileId, name) {
-  deletingFileId = fileId;
-  document.getElementById("deleteModalSub").textContent =
-    `"${name}" — all Cloudinary chunks will be removed permanently.`;
+function openDeleteModal(fileId) {
+  pendingDeleteId = fileId;
   document.getElementById("deleteModal").classList.add("open");
-};
-window.closeDeleteModal = function() {
-  document.getElementById("deleteModal").classList.remove("open");
-  deletingFileId = null;
-};
-window.confirmDelete = async function() {
-  if (!deletingFileId) return;
-  const btn = document.getElementById("btnConfirmDelete");
-  btn.disabled = true; btn.textContent = "Deleting…";
+}
+async function confirmDelete() {
+  if (!pendingDeleteId) return;
+  closeModal("deleteModal");
+  const token = ownerTokens[pendingDeleteId];
+  const headers = { "Content-Type":"application/json" };
+  if (token) headers["x-owner-token"] = token; else headers["x-owner-key"] = OWNER_KEY;
   try {
-    await deleteFile(deletingFileId);
-    showToast("File permanently deleted from cloud", "ok");
-    closeDeleteModal();
-    await loadFiles();
-  } catch (err) {
-    showToast("Error: " + err.message, "err");
-  } finally {
-    btn.disabled = false; btn.textContent = "Delete forever";
+    const r = await fetch(`${API}/file/${pendingDeleteId}`, { method: "DELETE", headers });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    allFiles = allFiles.filter(f => f.fileId !== pendingDeleteId);
+    renderTable(); updateStats();
+    showToast("File deleted permanently", "success");
+  } catch (err) { showToast("Delete failed: " + err.message, "error"); }
+  pendingDeleteId = null;
+}
+
+function openExpiryModal(fileId, currentExpiry) {
+  pendingExpiryId = fileId;
+  const f = allFiles.find(f => f.fileId === fileId);
+  document.getElementById("expiryModalSub").textContent =
+    `File: ${f ? f.name : fileId}`;
+  const dt = new Date(currentExpiry);
+  const local = new Date(dt.getTime() - dt.getTimezoneOffset()*60000).toISOString().slice(0,16);
+  document.getElementById("expiryDateInput").value = local;
+  document.getElementById("expiryModal").classList.add("open");
+}
+async function confirmExpiry() {
+  if (!pendingExpiryId) return;
+  const val = document.getElementById("expiryDateInput").value;
+  if (!val) return showToast("Pick a date/time", "error");
+  const newMs = new Date(val).getTime();
+  closeModal("expiryModal");
+  const token = ownerTokens[pendingExpiryId];
+  const headers = { "Content-Type":"application/json" };
+  if (token) headers["x-owner-token"] = token; else headers["x-owner-key"] = OWNER_KEY;
+  try {
+    const r = await fetch(`${API}/file/${pendingExpiryId}/expiry`, {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify({ expiresAt: newMs })
+    });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const data = await r.json();
+    const f = allFiles.find(f => f.fileId === pendingExpiryId);
+    if (f) { f.expiresAt = data.expiresAt; f.expired = data.expiresAt < Date.now(); }
+    renderTable(); updateStats();
+    showToast("Expiry updated!", "success");
+  } catch (err) { showToast("Update failed: " + err.message, "error"); }
+  pendingExpiryId = null;
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+document.querySelectorAll(".modal-overlay").forEach(m => {
+  m.addEventListener("click", e => { if (e.target === m) m.classList.remove("open"); });
+});
+
+// ═══════════════════════════════════════════
+// UPLOAD
+// ═══════════════════════════════════════════
+let filesToUpload = [];
+
+function handleDragOver(e) { e.preventDefault(); document.getElementById("dropZone").classList.add("dragover"); }
+function handleDragLeave() { document.getElementById("dropZone").classList.remove("dragover"); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById("dropZone").classList.remove("dragover");
+  addFiles([...e.dataTransfer.files]);
+}
+function handleFileSelect(e) { addFiles([...e.target.files]); }
+
+function addFiles(files) {
+  files.forEach(f => {
+    if (!filesToUpload.find(x => x.file.name === f.name && x.file.size === f.size)) {
+      filesToUpload.push({ file: f, status: "pending", id: crypto.randomUUID() });
+    }
+  });
+  renderQueue();
+  const btn = document.getElementById("uploadStartBtn");
+  btn.disabled = filesToUpload.length === 0;
+  btn.textContent = filesToUpload.length > 0 ? `Upload ${filesToUpload.length} File${filesToUpload.length>1?"s":""}` : "Select files first";
+}
+
+function renderQueue() {
+  const container = document.getElementById("uploadQueue");
+  container.innerHTML = filesToUpload.map(item => `
+    <div class="queue-item" id="qi-${item.id}">
+      <span class="queue-icon">${fileEmoji(item.file.type)}</span>
+      <div class="queue-info">
+        <div class="queue-name">${esc(item.file.name)}</div>
+        <div class="queue-meta">${fmtBytes(item.file.size)}</div>
+      </div>
+      <span class="queue-status ${item.status}" id="qs-${item.id}">${
+        item.status === "pending" ? "PENDING" :
+        item.status === "uploading" ? "UPLOADING…" :
+        item.status === "done" ? "✓ DONE" : "✗ FAILED"
+      }</span>
+    </div>
+  `).join("");
+}
+
+function updateExpiryCustom() {
+  const val = document.getElementById("expiryPreset").value;
+  document.getElementById("customExpiryField").style.display = val === "custom" ? "block" : "none";
+}
+
+function getExpiryMs() {
+  const sel = document.getElementById("expiryPreset").value;
+  if (sel === "custom") {
+    const min = parseInt(document.getElementById("customExpiryMin").value) || 1440;
+    return min * 60 * 1000;
   }
-};
+  return parseInt(sel);
+}
 
-// Close modals on backdrop click
-document.getElementById("expiryModal").addEventListener("click", e => {
-  if (e.target === e.currentTarget) closeExpiryModal();
-});
-document.getElementById("deleteModal").addEventListener("click", e => {
-  if (e.target === e.currentTarget) closeDeleteModal();
-});
+async function startUploads() {
+  const btn = document.getElementById("uploadStartBtn");
+  btn.disabled = true;
+  const chunkSize = parseInt(document.getElementById("chunkSizeSel").value);
+  const expiryMs  = getExpiryMs();
 
-// ── Toast ──────────────────────────────────────
+  for (const item of filesToUpload) {
+    if (item.status === "done") continue;
+    item.status = "uploading";
+    renderQueue();
+    try {
+      await uploadFile(item.file, chunkSize, expiryMs, item.id);
+      item.status = "done";
+    } catch (err) {
+      item.status = "fail";
+      showToast(`Upload failed: ${err.message}`, "error");
+    }
+    renderQueue();
+  }
+  btn.disabled = false;
+  btn.textContent = "Upload Again";
+  showToast("All uploads complete!", "success");
+  setTimeout(() => { switchPage("files"); }, 1200);
+}
+
+async function uploadFile(file, chunkSize, expiryMs, queueId) {
+  const fileId = [...crypto.getRandomValues(new Uint8Array(16))].map(b=>b.toString(16).padStart(2,"0")).join("");
+
+  // Generate IV for UI display purposes (real encryption would happen here)
+  const iv = [...crypto.getRandomValues(new Uint8Array(12))].map(b=>b.toString(16).padStart(2,"0")).join("");
+
+  const totalChunks = Math.ceil(file.size / chunkSize);
+  const chunkIds = [];
+  const wrap = document.getElementById("uploadProgressWrap");
+  const bar  = document.getElementById("progressBar");
+  const lbl  = document.getElementById("progressLabel");
+  wrap.classList.add("active");
+
+  for (let i = 0; i < totalChunks; i++) {
+    const start = i * chunkSize;
+    const blob  = file.slice(start, start + chunkSize);
+    const fd = new FormData();
+    fd.append("chunk", blob, `chunk_${i}.enc`);
+
+    const r = await fetch(`${API}/upload/chunk-single`, {
+      method: "POST",
+      headers: { "x-file-id": fileId, "x-chunk-index": String(i) },
+      body: fd,
+    });
+    if (!r.ok) throw new Error(`Chunk ${i} failed: HTTP ${r.status}`);
+    const data = await r.json();
+    chunkIds.push(data.chunkId);
+
+    const pct = Math.round(((i+1)/totalChunks)*100);
+    bar.style.width = pct + "%";
+    lbl.textContent = `Uploading chunk ${i+1}/${totalChunks} (${pct}%)`;
+  }
+
+  lbl.textContent = "Finalizing…";
+  const fr = await fetch(`${API}/upload/finalize`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      fileId,
+      fileName: file.name,
+      mimeType: file.type || "application/octet-stream",
+      size: file.size,
+      chunkIds,
+      iv,
+      ownerKey: OWNER_KEY,
+      expiryMs,
+    }),
+  });
+  if (!fr.ok) throw new Error("Finalize failed: HTTP " + fr.status);
+  const finalized = await fr.json();
+  if (finalized.ownerToken) {
+    ownerTokens[finalized.fileId] = finalized.ownerToken;
+    saveTokens();
+  }
+
+  bar.style.width = "100%";
+  lbl.textContent = "✓ Upload complete";
+  setTimeout(() => { wrap.classList.remove("active"); bar.style.width="0%"; }, 2000);
+}
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function fmtBytes(b) {
+  if (!b) return "—";
+  if (b < 1024) return b + " B";
+  if (b < 1048576) return (b/1024).toFixed(1) + " KB";
+  if (b < 1073741824) return (b/1048576).toFixed(1) + " MB";
+  return (b/1073741824).toFixed(2) + " GB";
+}
+function esc(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function fileEmoji(mime) {
+  if (!mime) return "📄";
+  if (mime.startsWith("image/")) return "🖼";
+  if (mime.startsWith("video/")) return "🎬";
+  if (mime.startsWith("audio/")) return "🎵";
+  if (mime.includes("pdf"))  return "📕";
+  if (mime.includes("zip") || mime.includes("compressed") || mime.includes("tar")) return "🗜";
+  if (mime.includes("word") || mime.includes("document")) return "📝";
+  if (mime.includes("sheet") || mime.includes("excel")) return "📊";
+  return "📄";
+}
+
 let toastTimer;
-function showToast(msg, type = "ok") {
-  const el = document.getElementById("toast");
-  el.textContent = msg;
-  el.className   = `toast show ${type}`;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove("show"), 3000);
-}
-window.showToast = showToast;
-
-// ── Format helpers ──────────────────────────────────────
-function fmtSize(bytes) {
-  if (!bytes) return "0 B";
-  const u = ["B","KB","MB","GB"];
-  let i = 0; let v = bytes;
-  while (v >= 1024 && i < 3) { v /= 1024; i++; }
-  return v.toFixed(i ? 1 : 0) + " " + u[i];
-}
-function msToHuman(ms) {
-  if (ms < 0) return "expired";
-  const m = Math.floor(ms / 60000);
-  const h = Math.floor(m / 60);
-  const d = Math.floor(h / 24);
-  if (d > 0) return d + "d " + (h % 24) + "h";
-  if (h > 0) return h + "h " + (m % 60) + "m";
-  return m + "m";
-}
-function timeAgo(ts) {
-  const ms = Date.now() - ts;
-  const m  = Math.floor(ms / 60000);
-  const h  = Math.floor(m / 60);
-  const d  = Math.floor(h / 24);
-  if (d > 0) return d + "d ago";
-  if (h > 0) return h + "h ago";
-  return m + "m ago";
-}
-function esc(str) {
-  return String(str).replace(/[&<>"']/g, c =>
-    ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" })[c]);
+function showToast(msg, type="info") {
+  const c = document.getElementById("toastContainer");
+  const t = document.createElement("div");
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span class="toast-dot"></span>${esc(msg)}`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
 }
 </script>
 </body>
