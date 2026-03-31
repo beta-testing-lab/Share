@@ -1,108 +1,87 @@
 /**
- *dropshield-client.js
- *
- * Client-side encrypt → chunk upload  /  chunk download → merge → decrypt
- *
- * Usage (upload):
- *   import { uploadFile } from "./dropshield-client.js";
- *   const { shareUrl, ownerToken } = await uploadFile(file, { onProgress });
- *
- * Usage (download):
- *   import { downloadFile } from "./dropshield-client.js";
- *   await downloadFile(fileId, keyB64, { onProgress });
- *
- * The encryption key is embedded in the URL fragment (#key=…) so it is
- * never sent to the server.
+ * dropshield-client.js
+ * Client-side encrypt → chunk upload / chunk download → merge → decrypt
+ * + Owner dashboard API (list files, set expiry, delete)
  */
 
-const SERVER     = "https://file-share-unique.onrender.com";
-const CHUNK_SIZE = 9 * 1024 * 1024;   // 9 MB — safely under Cloudinary's 10 MB limit
+export const SERVER     = "https://file-share-unique.onrender.com";
+const CHUNK_SIZE = 9 * 1024 * 1024;  // 9 MB — under Cloudinary 10 MB limit
 
 // ─────────────────────────────────────────────
-// WEB CRYPTO HELPERS
+// OWNER KEY — persistent identity stored in localStorage
+// Generated once per browser. Sent with every upload so the server
+// can associate files with this owner. Never exposed publicly.
 // ─────────────────────────────────────────────
 
-/** Generate a fresh AES-256-GCM key */
-async function generateKey() {
-  return crypto.subtle.generateKey(
-    { name: "AES-GCM", length: 256 },
-    true,          // extractable — we need to export it for the share URL
-    ["encrypt", "decrypt"]
-  );
+export function getOrCreateOwnerKey() {
+  let key = localStorage.getItem("ds_owner_key");
+  if (!key) {
+    key = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+      .map(b => b.toString(16).padStart(2, "0")).join("");
+    localStorage.setItem("ds_owner_key", key);
+  }
+  return key;
 }
 
-/** Export CryptoKey → base64 string */
+// Store per-file ownerToken (for individual file ops without the session key)
+export function saveOwnerToken(fileId, token) {
+  const map = JSON.parse(localStorage.getItem("ds_owner_tokens") || "{}");
+  map[fileId] = token;
+  localStorage.setItem("ds_owner_tokens", JSON.stringify(map));
+}
+export function getOwnerToken(fileId) {
+  const map = JSON.parse(localStorage.getItem("ds_owner_tokens") || "{}");
+  return map[fileId] || null;
+}
+
+// ─────────────────────────────────────────────
+// CRYPTO HELPERS
+// ─────────────────────────────────────────────
+
+async function generateKey() {
+  return crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+}
 async function exportKey(key) {
   const raw = await crypto.subtle.exportKey("raw", key);
   return bufToBase64(raw);
 }
-
-/** Import base64 string → CryptoKey */
 async function importKey(b64) {
-  const raw = base64ToBuf(b64);
   return crypto.subtle.importKey(
-    "raw", raw,
-    { name: "AES-GCM", length: 256 },
-    false,
-    ["decrypt"]
+    "raw", base64ToBuf(b64),
+    { name: "AES-GCM", length: 256 }, false, ["decrypt"]
   );
 }
-
-/** Encrypt an ArrayBuffer, returns { ciphertext: ArrayBuffer, iv: Uint8Array } */
-async function encryptBuffer(key, plainBuffer) {
-  const iv = crypto.getRandomValues(new Uint8Array(12));   // 96-bit IV for AES-GCM
-  const ciphertext = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv },
-    key,
-    plainBuffer
-  );
-  return { ciphertext, iv };
+async function encryptBuffer(key, plain) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plain);
+  return { ciphertext: ct, iv };
 }
-
-/** Decrypt an ArrayBuffer using AES-GCM */
-async function decryptBuffer(key, cipherBuffer, iv) {
+async function decryptBuffer(key, cipher, iv) {
   return crypto.subtle.decrypt(
     { name: "AES-GCM", iv: typeof iv === "string" ? base64ToBuf(iv) : iv },
-    key,
-    cipherBuffer
+    key, cipher
   );
 }
-
-// ─────────────────────────────────────────────
-// BINARY / BASE64 HELPERS
-// ─────────────────────────────────────────────
 
 function bufToBase64(buf) {
   return btoa(String.fromCharCode(...new Uint8Array(buf)));
 }
-
 function base64ToBuf(b64) {
   const bin = atob(b64);
   const out = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out.buffer;
 }
-
-/** Split an ArrayBuffer into ≤chunkSize pieces */
-function splitBuffer(buf, chunkSize) {
+function splitBuffer(buf, size) {
   const chunks = [];
-  let offset = 0;
-  while (offset < buf.byteLength) {
-    chunks.push(buf.slice(offset, offset + chunkSize));
-    offset += chunkSize;
-  }
+  for (let o = 0; o < buf.byteLength; o += size) chunks.push(buf.slice(o, o + size));
   return chunks;
 }
-
-/** Merge an array of ArrayBuffers into one */
-function mergeBuffers(buffers) {
-  const total = buffers.reduce((s, b) => s + b.byteLength, 0);
+function mergeBuffers(bufs) {
+  const total = bufs.reduce((s, b) => s + b.byteLength, 0);
   const out   = new Uint8Array(total);
   let offset  = 0;
-  for (const b of buffers) {
-    out.set(new Uint8Array(b), offset);
-    offset += b.byteLength;
-  }
+  for (const b of bufs) { out.set(new Uint8Array(b), offset); offset += b.byteLength; }
   return out.buffer;
 }
 
@@ -111,94 +90,73 @@ function mergeBuffers(buffers) {
 // ─────────────────────────────────────────────
 
 /**
- * Upload a File with client-side encryption.
- *
  * @param {File} file
- * @param {{ onProgress?: (pct: number, phase: string) => void }} opts
- * @returns {{ shareUrl: string, ownerToken: string, fileId: string }}
+ * @param {{ onProgress?, expiryMs? }} opts
+ * @returns {{ shareUrl, ownerToken, fileId, expiresAt }}
  */
-export async function uploadFile(file, { onProgress } = {}) {
-  const report = (pct, phase) => onProgress?.(pct, phase);
+export async function uploadFile(file, { onProgress, expiryMs } = {}) {
+  const report = (p, ph) => onProgress?.(p, ph);
+  const ownerKey = getOrCreateOwnerKey();
 
-  // 1. Read file
   report(0, "reading");
-  const plainBuffer = await file.arrayBuffer();
+  const plain = await file.arrayBuffer();
 
-  // 2. Encrypt
   report(2, "encrypting");
-  const key = await generateKey();
-  const { ciphertext, iv } = await encryptBuffer(key, plainBuffer);
+  const key              = await generateKey();
+  const { ciphertext, iv } = await encryptBuffer(key, plain);
 
-  // 3. Split into chunks
   const chunks      = splitBuffer(ciphertext, CHUNK_SIZE);
   const fileId      = crypto.randomUUID();
   const totalChunks = chunks.length;
 
   report(5, "uploading");
-
-  // 4. Upload each chunk
   const chunkIds = [];
+
   for (let i = 0; i < totalChunks; i++) {
-    const blob    = new Blob([chunks[i]], { type: "application/octet-stream" });
-    const form    = new FormData();
-    form.append("chunk", blob, `chunk_${i}.enc`);
+    const form = new FormData();
+    form.append("chunk", new Blob([chunks[i]], { type: "application/octet-stream" }), `chunk_${i}.enc`);
 
     const res = await fetch(`${SERVER}/upload/chunk-single`, {
-      method:  "POST",
-      headers: {
-        "x-file-id":     fileId,
-        "x-chunk-index": String(i),
-      },
+      method: "POST",
+      headers: { "x-file-id": fileId, "x-chunk-index": String(i) },
       body: form,
     });
-
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(`Chunk ${i} upload failed: ${err.error || res.status}`);
+      const e = await res.json().catch(() => ({}));
+      throw new Error(`Chunk ${i} failed: ${e.error || res.status}`);
     }
-
-    const { chunkId } = await res.json();
-    chunkIds.push(chunkId);
-
-    // 5% – 90% for uploads
+    chunkIds.push((await res.json()).chunkId);
     report(5 + Math.round(((i + 1) / totalChunks) * 85), "uploading");
   }
 
-  // 5. Finalize — send manifest
   report(92, "finalizing");
   const keyB64 = await exportKey(key);
   const ivB64  = bufToBase64(iv);
 
   const finalRes = await fetch(`${SERVER}/upload/finalize`, {
-    method:  "POST",
+    method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      fileId,
-      fileName:    file.name,
-      mimeType:    file.type || "application/octet-stream",
-      size:        file.size,
-      chunkIds,
-      iv:          ivB64,
+      fileId, fileName: file.name,
+      mimeType: file.type || "application/octet-stream",
+      size: file.size, chunkIds, iv: ivB64,
+      ownerKey,
+      expiryMs: expiryMs || undefined,
     }),
   });
-
   if (!finalRes.ok) {
-    const err = await finalRes.json().catch(() => ({}));
-    throw new Error(`Finalize failed: ${err.error || finalRes.status}`);
+    const e = await finalRes.json().catch(() => ({}));
+    throw new Error(`Finalize failed: ${e.error || finalRes.status}`);
   }
 
   const result = await finalRes.json();
   report(100, "done");
 
-  // 6. Build share URL — key goes in fragment, never sent to server
-  const shareUrl = `${result.url}#key=${encodeURIComponent(keyB64)}`;
+  // Persist ownerToken for this file
+  saveOwnerToken(fileId, result.ownerToken);
 
-  return {
-    shareUrl,
-    ownerToken: result.ownerToken,
-    fileId:     result.fileId,
-    expiresAt:  result.expiresAt,
-  };
+  const shareUrl = `${result.url}#key=${encodeURIComponent(keyB64)}`;
+  return { shareUrl, ownerToken: result.ownerToken, fileId: result.fileId, expiresAt: result.expiresAt };
 }
 
 // ─────────────────────────────────────────────
@@ -206,83 +164,118 @@ export async function uploadFile(file, { onProgress } = {}) {
 // ─────────────────────────────────────────────
 
 /**
- * Download, decrypt and save a file.
- *
  * @param {string} fileId
- * @param {string} keyB64  — base64 AES-GCM key (from URL fragment)
- * @param {{ onProgress?: (pct: number, phase: string) => void }} opts
+ * @param {string} keyB64
+ * @param {{ onProgress? }} opts
  */
 export async function downloadFile(fileId, keyB64, { onProgress } = {}) {
-  const report = (pct, phase) => onProgress?.(pct, phase);
+  const report = (p, ph) => onProgress?.(p, ph);
 
-  // 1. Import key
   report(0, "preparing");
   const key = await importKey(keyB64);
 
-  // 2. Fetch manifest
   report(2, "fetching manifest");
   const infoRes = await fetch(`${SERVER}/file-info/${fileId}`);
   if (!infoRes.ok) throw new Error(infoRes.status === 410 ? "File has expired" : "File not found");
-  const info = await infoRes.json();   // { chunkIds, iv, name, mimeType, totalChunks, … }
+  const { chunkIds, iv, name, mimeType, totalChunks } = await infoRes.json();
 
-  const { chunkIds, iv, name, mimeType, totalChunks } = info;
-
-  // 3. Fetch chunks one by one
-  const chunkBuffers = [];
+  const chunkBufs = [];
   for (let i = 0; i < totalChunks; i++) {
-    const cid     = encodeURIComponent(chunkIds[i]);
+    const cid      = encodeURIComponent(chunkIds[i]);
     const chunkRes = await fetch(`${SERVER}/chunk/${cid}`);
-    if (!chunkRes.ok) throw new Error(`Chunk ${i} fetch failed (${chunkRes.status})`);
-
-    chunkBuffers.push(await chunkRes.arrayBuffer());
-
-    // 5% – 80% for fetching
+    if (!chunkRes.ok) throw new Error(`Chunk ${i} failed (${chunkRes.status})`);
+    chunkBufs.push(await chunkRes.arrayBuffer());
     report(5 + Math.round(((i + 1) / totalChunks) * 75), "downloading");
   }
 
-  // 4. Merge
   report(82, "merging");
-  const merged = mergeBuffers(chunkBuffers);
+  const merged = mergeBuffers(chunkBufs);
 
-  // 5. Decrypt
   report(88, "decrypting");
-  let plainBuffer;
-  try {
-    plainBuffer = await decryptBuffer(key, merged, iv);
-  } catch {
-    throw new Error("Decryption failed — wrong key or corrupted file");
-  }
+  let plain;
+  try { plain = await decryptBuffer(key, merged, iv); }
+  catch { throw new Error("Decryption failed — wrong key or corrupted file"); }
 
-  // 6. Trigger browser download
   report(98, "saving");
-  const blob    = new Blob([plainBuffer], { type: mimeType });
-  const url     = URL.createObjectURL(blob);
-  const a       = document.createElement("a");
-  a.href        = url;
-  a.download    = name;
+  const blob = new Blob([plain], { type: mimeType });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement("a"), { href: url, download: name });
   document.body.appendChild(a);
   a.click();
   setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 5000);
 
   report(100, "done");
-  return { name, size: plainBuffer.byteLength, mimeType };
+  return { name, size: plain.byteLength, mimeType };
 }
 
 // ─────────────────────────────────────────────
-// AUTO-DOWNLOAD on page load (for /file/:id pages)
-//
-// If this script is loaded on a page whose URL contains both:
-//   - a fileId path segment  (/file/UUID)
-//   - a #key= fragment
-// it automatically starts the download.
+// OWNER DASHBOARD API
+// ─────────────────────────────────────────────
+
+/** Fetch all files uploaded by this browser session */
+export async function fetchMyFiles() {
+  const ownerKey = getOrCreateOwnerKey();
+  const res = await fetch(`${SERVER}/owner/files`, {
+    headers: { "x-owner-key": ownerKey },
+  });
+  if (!res.ok) throw new Error("Failed to fetch file list");
+  return res.json();   // array of file objects
+}
+
+/**
+ * Set a new absolute expiry for a file.
+ * @param {string} fileId
+ * @param {number} expiresAt  — unix ms timestamp
+ */
+export async function setExpiry(fileId, expiresAt) {
+  const ownerKey   = getOrCreateOwnerKey();
+  const ownerToken = getOwnerToken(fileId);
+
+  const res = await fetch(`${SERVER}/file/${fileId}/expiry`, {
+    method:  "PATCH",
+    headers: {
+      "Content-Type":  "application/json",
+      "x-owner-key":   ownerKey,
+      ...(ownerToken ? { "x-owner-token": ownerToken } : {}),
+    },
+    body: JSON.stringify({ expiresAt }),
+  });
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.error || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+/**
+ * Permanently delete a file and all its Cloudinary chunks.
+ * @param {string} fileId
+ */
+export async function deleteFile(fileId) {
+  const ownerKey   = getOrCreateOwnerKey();
+  const ownerToken = getOwnerToken(fileId);
+
+  const res = await fetch(`${SERVER}/file/${fileId}`, {
+    method:  "DELETE",
+    headers: {
+      "x-owner-key": ownerKey,
+      ...(ownerToken ? { "x-owner-token": ownerToken } : {}),
+    },
+  });
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e.error || `HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+// ─────────────────────────────────────────────
+// AUTO-DOWNLOAD helper
 // ─────────────────────────────────────────────
 export function autoDownloadIfSharePage(onProgress) {
   const match  = location.pathname.match(/\/file\/([a-f0-9-]{36})/i);
   const keyB64 = new URLSearchParams(location.hash.slice(1)).get("key");
-
   if (match && keyB64) {
-    downloadFile(match[1], keyB64, { onProgress }).catch(err => {
-      console.error("Auto-download failed:", err.message);
-    });
+    downloadFile(match[1], keyB64, { onProgress }).catch(console.error);
   }
 }
