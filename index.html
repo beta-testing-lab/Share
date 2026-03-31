@@ -3,435 +3,716 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DropShield</title>
+<title>DropShield — My Files</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --bg:      #0a0a0f;
-    --surface: #12121a;
-    --border:  #1e1e2e;
-    --accent:  #7c6af7;
-    --accent2: #5ef0b8;
-    --text:    #e8e8f0;
-    --muted:   #6b6b80;
-    --danger:  #f07060;
-    --mono:    "IBM Plex Mono", monospace;
-    --sans:    "Syne", sans-serif;
-  }
+:root {
+  --bg:       #080810;
+  --surf:     #0e0e1a;
+  --surf2:    #13131f;
+  --border:   rgba(255,255,255,.07);
+  --border2:  rgba(255,255,255,.12);
+  --text:     #ddddf0;
+  --muted:    #6b6b90;
+  --accent:   #7c6af7;
+  --green:    #3dd68c;
+  --red:      #f06060;
+  --yellow:   #f0c060;
+  --mono:     "IBM Plex Mono", monospace;
+  --sans:     "Syne", sans-serif;
+}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px 16px 80px;
-  }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+}
 
-  /* Grid texture */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
-    background-size: 40px 40px;
-    opacity: 0.35;
-    pointer-events: none;
-    z-index: 0;
-  }
+/* Dot-grid bg */
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
 
-  .container { position: relative; z-index: 1; width: 100%; max-width: 560px; }
+/* ── Layout ── */
+.layout { display: flex; min-height: 100vh; position: relative; z-index: 1; }
 
-  header { text-align: center; margin-bottom: 48px; }
-  .logo {
-    font-size: 13px;
-    font-family: var(--mono);
-    color: var(--accent2);
-    letter-spacing: .15em;
-    margin-bottom: 10px;
-  }
-  h1 { font-size: 36px; font-weight: 700; letter-spacing: -.02em; }
-  .tagline {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 8px;
-    letter-spacing: .05em;
-  }
+/* Sidebar */
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--surf);
+  border-right: 1px solid var(--border);
+  padding: 28px 0;
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh;
+}
+.logo {
+  padding: 0 20px 28px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.logo-mark { font-size: 11px; font-family: var(--mono); color: var(--accent); letter-spacing: .2em; margin-bottom: 4px; }
+.logo-name { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
 
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px;
-    margin-bottom: 16px;
-  }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 20px;
+  font-size: 13px; font-family: var(--mono);
+  color: var(--muted); cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: all .15s;
+  text-decoration: none;
+}
+.nav-item:hover { color: var(--text); background: var(--surf2); }
+.nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(124,106,247,.06); }
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 
-  .card-title {
-    font-size: 11px;
-    font-family: var(--mono);
-    color: var(--muted);
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-  }
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+}
+.owner-key-display {
+  font-family: var(--mono); font-size: 9px; color: var(--muted);
+  word-break: break-all; line-height: 1.6;
+}
 
-  /* Drop zone */
-  .drop-zone {
-    border: 1.5px dashed var(--border);
-    border-radius: 12px;
-    padding: 40px 24px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color .2s, background .2s;
-    position: relative;
-  }
-  .drop-zone:hover, .drop-zone.over {
-    border-color: var(--accent);
-    background: rgba(124,106,247,.05);
-  }
-  .drop-zone input {
-    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-  }
-  .drop-icon {
-    font-size: 28px;
-    margin-bottom: 10px;
-    display: block;
-  }
-  .drop-label { font-size: 14px; color: var(--text); }
-  .drop-sub   { font-size: 12px; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
+/* Main */
+.main { flex: 1; padding: 36px 40px; overflow-x: hidden; }
 
-  /* Progress */
-  .progress-wrap { margin-top: 20px; display: none; }
-  .progress-wrap.visible { display: block; }
-  .progress-bar-bg {
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: 8px;
-  }
-  .progress-bar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border-radius: 2px;
-    width: 0%;
-    transition: width .2s;
-  }
-  .progress-label {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--muted);
-    display: flex;
-    justify-content: space-between;
-  }
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 32px;
+}
+.page-title { font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
+.page-sub   { font-size: 12px; font-family: var(--mono); color: var(--muted); margin-top: 4px; }
 
-  /* Result */
-  .result { display: none; margin-top: 20px; }
-  .result.visible { display: block; }
-  .result-label {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-  }
-  .share-url {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent2);
-    word-break: break-all;
-    user-select: all;
-    margin-bottom: 10px;
-    line-height: 1.6;
-  }
-  .copy-btn {
-    background: transparent;
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    font-family: var(--mono);
-    font-size: 12px;
-    padding: 7px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background .15s, color .15s;
-    letter-spacing: .05em;
-  }
-  .copy-btn:hover { background: var(--accent); color: #fff; }
+/* Stats row */
+.stats { display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
+.stat-card {
+  flex: 1; min-width: 140px;
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+.stat-label { font-size: 10px; font-family: var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
+.stat-val   { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+.stat-val.green  { color: var(--green); }
+.stat-val.yellow { color: var(--yellow); }
+.stat-val.red    { color: var(--red); }
 
-  /* Download section */
-  .dl-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-  .dl-input {
-    flex: 1;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--text);
-    outline: none;
-    transition: border-color .2s;
-  }
-  .dl-input:focus { border-color: var(--accent); }
-  .dl-input::placeholder { color: var(--muted); }
+/* Toolbar */
+.toolbar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px; flex-wrap: wrap;
+}
+.search-box {
+  flex: 1; min-width: 200px;
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-family: var(--mono); font-size: 12px;
+  color: var(--text); outline: none;
+  transition: border-color .2s;
+}
+.search-box:focus { border-color: var(--accent); }
+.search-box::placeholder { color: var(--muted); }
+.filter-btn {
+  background: var(--surf); border: 1px solid var(--border);
+  border-radius: 8px; padding: 9px 14px;
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); }
+.refresh-btn {
+  background: var(--accent); border: none;
+  border-radius: 8px; padding: 9px 16px;
+  font-family: var(--mono); font-size: 11px; color: #fff;
+  cursor: pointer; transition: opacity .15s;
+}
+.refresh-btn:hover { opacity: .85; }
 
-  .btn {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-family: var(--mono);
-    font-size: 12px;
-    cursor: pointer;
-    transition: opacity .15s;
-    letter-spacing: .04em;
-    white-space: nowrap;
-  }
-  .btn:hover   { opacity: .85; }
-  .btn:disabled { opacity: .4; cursor: not-allowed; }
+/* File table */
+.file-table-wrap {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.file-table {
+  width: 100%; border-collapse: collapse;
+}
+.file-table th {
+  font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted);
+  padding: 12px 16px; text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-weight: 400;
+}
+.file-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.file-table tr:last-child td { border-bottom: none; }
+.file-table tbody tr { transition: background .1s; }
+.file-table tbody tr:hover { background: var(--surf2); }
 
-  .hint {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    line-height: 1.7;
-  }
-  .hint span { color: var(--accent2); }
+.file-name {
+  font-weight: 600; font-size: 14px;
+  max-width: 220px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.file-meta {
+  font-family: var(--mono); font-size: 10px; color: var(--muted);
+  margin-top: 2px;
+}
+.badge {
+  display: inline-flex; align-items: center;
+  font-family: var(--mono); font-size: 10px;
+  padding: 3px 8px; border-radius: 20px;
+  font-weight: 500; letter-spacing: .04em;
+}
+.badge.active  { background: rgba(61,214,140,.1);  color: var(--green);  border: 1px solid rgba(61,214,140,.2); }
+.badge.expired { background: rgba(240,96,96,.1);   color: var(--red);    border: 1px solid rgba(240,96,96,.2); }
+.badge.soon    { background: rgba(240,192,96,.1);  color: var(--yellow); border: 1px solid rgba(240,192,96,.2); }
 
-  .error-msg {
-    font-family: var(--mono);
-    font-size: 12px;
-    color: var(--danger);
-    margin-top: 10px;
-    display: none;
-  }
-  .error-msg.visible { display: block; }
+.expiry-cell { font-family: var(--mono); font-size: 11px; }
+.expiry-time { color: var(--text); }
+.expiry-rel  { color: var(--muted); font-size: 10px; margin-top: 2px; }
 
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-family: var(--mono);
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 20px;
-    letter-spacing: .06em;
-  }
-  .pill.enc { background: rgba(94,240,184,.08); color: var(--accent2); border: 1px solid rgba(94,240,184,.2); }
-  .pill.cld { background: rgba(124,106,247,.08); color: var(--accent);  border: 1px solid rgba(124,106,247,.2); }
+/* Action buttons */
+.actions { display: flex; gap: 6px; align-items: center; }
+.act-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--muted); cursor: pointer;
+  transition: all .15s; white-space: nowrap;
+}
+.act-btn:hover           { border-color: var(--accent); color: var(--accent); }
+.act-btn.danger:hover    { border-color: var(--red);    color: var(--red); }
+.act-btn.copy:hover      { border-color: var(--green);  color: var(--green); }
+.act-btn:disabled        { opacity: .35; cursor: not-allowed; }
 
-  .pills { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+/* ── Expiry modal ── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,.7);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.modal-backdrop.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surf2);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%; max-width: 440px;
+  transform: translateY(12px); transition: transform .2s;
+}
+.modal-backdrop.open .modal { transform: translateY(0); }
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.modal-sub   { font-size: 12px; font-family: var(--mono); color: var(--muted); margin-bottom: 24px; }
 
-  footer {
-    margin-top: 40px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    text-align: center;
-    line-height: 1.8;
-  }
+.expiry-presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.preset-btn {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 7px 14px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--muted); cursor: pointer;
+  transition: all .15s;
+}
+.preset-btn:hover, .preset-btn.sel {
+  border-color: var(--accent); color: var(--accent);
+  background: rgba(124,106,247,.08);
+}
+
+.expiry-label {
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  margin-bottom: 6px;
+}
+.expiry-input {
+  width: 100%;
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px;
+  font-family: var(--mono); font-size: 12px;
+  color: var(--text); outline: none;
+  transition: border-color .2s; margin-bottom: 8px;
+}
+.expiry-input:focus { border-color: var(--accent); }
+.expiry-preview {
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  margin-bottom: 20px;
+}
+.expiry-preview span { color: var(--accent); }
+
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.btn-cancel {
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 8px; padding: 9px 18px;
+  font-family: var(--mono); font-size: 12px;
+  color: var(--muted); cursor: pointer;
+  transition: all .15s;
+}
+.btn-cancel:hover { color: var(--text); border-color: var(--border2); }
+.btn-save {
+  background: var(--accent);
+  border: none; border-radius: 8px;
+  padding: 9px 20px;
+  font-family: var(--mono); font-size: 12px;
+  color: #fff; cursor: pointer;
+  transition: opacity .15s;
+}
+.btn-save:hover    { opacity: .85; }
+.btn-save:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ── Delete confirm ── */
+.delete-modal .modal-title { color: var(--red); }
+.btn-delete {
+  background: var(--red);
+  border: none; border-radius: 8px;
+  padding: 9px 20px;
+  font-family: var(--mono); font-size: 12px;
+  color: #fff; cursor: pointer;
+  transition: opacity .15s;
+}
+.btn-delete:hover    { opacity: .85; }
+.btn-delete:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Empty / loading */
+.empty-state {
+  text-align: center; padding: 64px 24px;
+  font-family: var(--mono); font-size: 13px; color: var(--muted);
+}
+.empty-icon { font-size: 32px; margin-bottom: 12px; opacity: .4; }
+
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border); border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  display: inline-block; vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 200;
+  background: var(--surf2); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 12px 18px;
+  font-family: var(--mono); font-size: 12px;
+  transform: translateY(20px); opacity: 0;
+  transition: all .25s; pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.ok  { border-color: rgba(61,214,140,.4); color: var(--green); }
+.toast.err { border-color: rgba(240,96,96,.4);  color: var(--red); }
 </style>
 </head>
 <body>
-<div class="container">
+<div class="layout">
 
-  <header>
-    <div class="logo">◈ DROPSHIELD</div>
-    <h1>Encrypted File Share</h1>
-    </header>
-
-  <!-- UPLOAD CARD -->
-  <div class="card">
-    <div class="card-title">Upload</div>
-    
-    <div class="drop-zone" id="dropZone">
-      <input type="file" id="fileInput" onchange="handleFileSelect(this.files[0])">
-      <span class="drop-icon">⬡</span>
-      <div class="drop-label">Drop a file or click to browse</div>
-      <div class="drop-sub">Any file type · encrypted before upload</div>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">◈ DROPSHIELD</div>
+      <div class="logo-name">Dashboard</div>
     </div>
+    <a class="nav-item" href="index.html"><span class="nav-dot"></span>Upload</a>
+    <a class="nav-item active" href="dashboard.html"><span class="nav-dot"></span>My Files</a>
 
-    <div class="progress-wrap" id="uploadProgress">
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="uploadBar"></div></div>
-      <div class="progress-label">
-        <span id="uploadPhase">preparing…</span>
-        <span id="uploadPct">0%</span>
+    <div class="sidebar-footer">
+      <div class="owner-key-display" id="ownerKeyDisplay">Owner key: loading…</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <div class="page-title">My Files</div>
+        <div class="page-sub" id="lastRefreshed">Loading…</div>
       </div>
     </div>
 
-    <div class="result" id="uploadResult">
-      <div class="result-label">Share URL (key in fragment)</div>
-      <div class="share-url" id="shareUrlDisplay"></div>
-      <button class="copy-btn" onclick="copyShareUrl()">Copy URL</button>
-    </div>
-
-    <div class="error-msg" id="uploadError"></div>
-  </div>
-
-  <!-- DOWNLOAD CARD -->
-  <div class="card">
-    <div class="card-title">Download</div>
-    <p class="hint" style="margin-bottom:16px">
-      Paste the full share URL below — the <span>#key=…</span> fragment is read
-      client-side and never sent to the server.
-    </p>
-
-    <div class="dl-row">
-      <input class="dl-input" type="text" id="dlInput"
-             placeholder="https://…/file/UUID#key=…">
-      <button class="btn" id="dlBtn" onclick="startDownload()">Decrypt</button>
-    </div>
-
-    <div class="progress-wrap" id="dlProgress">
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="dlBar"></div></div>
-      <div class="progress-label">
-        <span id="dlPhase">waiting…</span>
-        <span id="dlPct">0%</span>
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">Total uploads</div>
+        <div class="stat-val" id="statTotal">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active</div>
+        <div class="stat-val green" id="statActive">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Expiring soon</div>
+        <div class="stat-val yellow" id="statSoon">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Expired</div>
+        <div class="stat-val red" id="statExpired">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total size</div>
+        <div class="stat-val" id="statSize">—</div>
       </div>
     </div>
 
-    <div class="error-msg" id="dlError"></div>
-  </div>
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <input class="search-box" id="searchBox" placeholder="Search files…" oninput="renderTable()">
+      <button class="filter-btn active" id="filterAll"    onclick="setFilter('all')">All</button>
+      <button class="filter-btn"        id="filterActive" onclick="setFilter('active')">Active</button>
+      <button class="filter-btn"        id="filterExpired" onclick="setFilter('expired')">Expired</button>
+      <button class="refresh-btn" onclick="loadFiles()">↻ Refresh</button>
+    </div>
 
-  <footer>
-    Server stores only encrypted blobs. The AES-256-GCM key lives in the URL fragment.<br>
-    Files expire after 7 days. Max 30 days with owner token.
-  </footer>
-
+    <!-- Table -->
+    <div class="file-table-wrap">
+      <table class="file-table">
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Status</th>
+            <th>Expiry</th>
+            <th>Chunks</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="fileTableBody">
+          <tr><td colspan="5"><div class="empty-state"><div class="spinner"></div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
 </div>
 
+<!-- Expiry Modal -->
+<div class="modal-backdrop" id="expiryModal">
+  <div class="modal">
+    <div class="modal-title">Edit Expiry</div>
+    <div class="modal-sub" id="expiryModalSub">Set a new expiry for this file.</div>
+
+    <div class="expiry-presets">
+      <button class="preset-btn" onclick="applyPreset(1)">1 day</button>
+      <button class="preset-btn" onclick="applyPreset(3)">3 days</button>
+      <button class="preset-btn" onclick="applyPreset(7)">7 days</button>
+      <button class="preset-btn" onclick="applyPreset(14)">14 days</button>
+      <button class="preset-btn" onclick="applyPreset(30)">30 days</button>
+    </div>
+
+    <div class="expiry-label">Or pick a specific date & time</div>
+    <input class="expiry-input" type="datetime-local" id="expiryDateInput" oninput="updatePreview()">
+    <div class="expiry-preview" id="expiryPreview"> </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeExpiryModal()">Cancel</button>
+      <button class="btn-save"   id="btnSaveExpiry" onclick="saveExpiry()">Save expiry</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal-backdrop delete-modal" id="deleteModal">
+  <div class="modal">
+    <div class="modal-title">Delete permanently?</div>
+    <div class="modal-sub" id="deleteModalSub">This will remove all chunks from Cloudinary. This cannot be undone.</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-delete" id="btnConfirmDelete" onclick="confirmDelete()">Delete forever</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
 <script type="module">
-  import { uploadFile, downloadFile } from "./dropshield-client.js";
+import {
+  getOrCreateOwnerKey,
+  fetchMyFiles,
+  setExpiry,
+  deleteFile,
+  SERVER,
+} from "./dropshield-client.js";
 
-  // ── Upload ──────────────────────────────────
-  let currentShareUrl = "";
+// ── State ──────────────────────────────────────
+let allFiles   = [];
+let filterMode = "all";
+let editingFileId  = null;
+let deletingFileId = null;
 
-  window.handleFileSelect = async function(file) {
-    if (!file) return;
-    const progress = document.getElementById("uploadProgress");
-    const result   = document.getElementById("uploadResult");
-    const errEl    = document.getElementById("uploadError");
-    const bar      = document.getElementById("uploadBar");
-    const phase    = document.getElementById("uploadPhase");
-    const pct      = document.getElementById("uploadPct");
+// ── Init ──────────────────────────────────────
+const ownerKey = getOrCreateOwnerKey();
+document.getElementById("ownerKeyDisplay").textContent =
+  "Key: " + ownerKey.slice(0, 8) + "…" + ownerKey.slice(-4);
 
-    progress.classList.add("visible");
-    result.classList.remove("visible");
-    errEl.classList.remove("visible");
+await loadFiles();
 
-    try {
-      const out = await uploadFile(file, {
-        onProgress(p, ph) {
-          bar.style.width   = p + "%";
-          pct.textContent   = p + "%";
-          phase.textContent = ph + "…";
-        }
-      });
-
-      currentShareUrl = out.shareUrl;
-      document.getElementById("shareUrlDisplay").textContent = out.shareUrl;
-      result.classList.add("visible");
-      phase.textContent = "done";
-
-    } catch (err) {
-      errEl.textContent = "✕ " + err.message;
-      errEl.classList.add("visible");
-      phase.textContent = "error";
-    }
-  };
-
-  window.copyShareUrl = function() {
-    navigator.clipboard.writeText(currentShareUrl).then(() => {
-      const btn = document.querySelector(".copy-btn");
-      btn.textContent = "Copied!";
-      setTimeout(() => btn.textContent = "Copy URL", 2000);
-    });
-  };
-
-  // ── Drag-and-drop ───────────────────────────
-  const dz = document.getElementById("dropZone");
-  dz.addEventListener("dragover",  e => { e.preventDefault(); dz.classList.add("over"); });
-  dz.addEventListener("dragleave", () => dz.classList.remove("over"));
-  dz.addEventListener("drop", e => {
-    e.preventDefault();
-    dz.classList.remove("over");
-    handleFileSelect(e.dataTransfer.files[0]);
-  });
-
-  // ── Download ────────────────────────────────
-  window.startDownload = async function() {
-    const input  = document.getElementById("dlInput").value.trim();
-    const btn    = document.getElementById("dlBtn");
-    const bar    = document.getElementById("dlBar");
-    const phase  = document.getElementById("dlPhase");
-    const pct    = document.getElementById("dlPct");
-    const prog   = document.getElementById("dlProgress");
-    const errEl  = document.getElementById("dlError");
-
-    errEl.classList.remove("visible");
-    if (!input) return;
-
-    // Parse fileId and key from URL
-    let fileId, keyB64;
-    try {
-      const url    = new URL(input);
-      const match  = url.pathname.match(/\/file\/([a-f0-9-]{36})/i);
-      if (!match) throw new Error("No file ID found in URL");
-      fileId = match[1];
-      keyB64 = new URLSearchParams(url.hash.slice(1)).get("key");
-      if (!keyB64) throw new Error("No #key= fragment found in URL");
-    } catch (err) {
-      errEl.textContent = "✕ " + err.message;
-      errEl.classList.add("visible");
-      return;
-    }
-
-    btn.disabled = true;
-    prog.classList.add("visible");
-
-    try {
-      await downloadFile(fileId, keyB64, {
-        onProgress(p, ph) {
-          bar.style.width   = p + "%";
-          pct.textContent   = p + "%";
-          phase.textContent = ph + "…";
-        }
-      });
-      phase.textContent = "done — check downloads";
-    } catch (err) {
-      errEl.textContent = "✕ " + err.message;
-      errEl.classList.add("visible");
-      phase.textContent = "error";
-    } finally {
-      btn.disabled = false;
-    }
-  };
-
-  // ── Auto-download if loaded on /file/UUID#key=… page ──
-  const pathMatch = location.pathname.match(/\/file\/([a-f0-9-]{36})/i);
-  const hashKey   = new URLSearchParams(location.hash.slice(1)).get("key");
-  if (pathMatch && hashKey) {
-    document.getElementById("dlInput").value = location.href;
-    startDownload();
+// ── Load ──────────────────────────────────────
+window.loadFiles = async function() {
+  document.getElementById("lastRefreshed").textContent = "Refreshing…";
+  try {
+    allFiles = await fetchMyFiles();
+    renderStats();
+    renderTable();
+    document.getElementById("lastRefreshed").textContent =
+      "Last refreshed: " + new Date().toLocaleTimeString();
+  } catch (err) {
+    showToast("Failed to load: " + err.message, "err");
+    document.getElementById("lastRefreshed").textContent = "Error loading";
   }
+};
+
+// ── Stats ──────────────────────────────────────
+function renderStats() {
+  const now      = Date.now();
+  const active   = allFiles.filter(f => !f.expired);
+  const expired  = allFiles.filter(f => f.expired);
+  const soon     = active.filter(f => f.expiresAt - now < 2 * 86400000);
+  const totalSz  = allFiles.reduce((s, f) => s + (f.size || 0), 0);
+
+  document.getElementById("statTotal").textContent   = allFiles.length;
+  document.getElementById("statActive").textContent  = active.length;
+  document.getElementById("statSoon").textContent    = soon.length;
+  document.getElementById("statExpired").textContent = expired.length;
+  document.getElementById("statSize").textContent    = fmtSize(totalSz);
+}
+
+// ── Table ──────────────────────────────────────
+function renderTable() {
+  const q      = document.getElementById("searchBox").value.toLowerCase();
+  const files  = allFiles
+    .filter(f => {
+      if (filterMode === "active")  return !f.expired;
+      if (filterMode === "expired") return f.expired;
+      return true;
+    })
+    .filter(f => !q || f.name.toLowerCase().includes(q));
+
+  const tbody = document.getElementById("fileTableBody");
+  if (!files.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">
+      <div class="empty-icon">◻</div>No files found.</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = files.map(f => {
+    const now        = Date.now();
+    const msLeft     = f.expiresAt - now;
+    const isExpired  = f.expired;
+    const isSoon     = !isExpired && msLeft < 2 * 86400000;
+    const badge      = isExpired
+      ? `<span class="badge expired">Expired</span>`
+      : isSoon
+        ? `<span class="badge soon">Expiring soon</span>`
+        : `<span class="badge active">Active</span>`;
+
+    const expiryStr  = new Date(f.expiresAt).toLocaleString();
+    const relStr     = isExpired
+      ? `Expired ${timeAgo(f.expiresAt)}`
+      : `In ${msToHuman(msLeft)}`;
+
+    const shareUrl = f.url;   // key fragment is client-only, not stored on server
+
+    return `<tr>
+      <td>
+        <div class="file-name" title="${esc(f.name)}">${esc(f.name)}</div>
+        <div class="file-meta">${fmtSize(f.size)} · ${f.mimeType || "unknown"}</div>
+      </td>
+      <td>${badge}</td>
+      <td>
+        <div class="expiry-cell">
+          <div class="expiry-time">${expiryStr}</div>
+          <div class="expiry-rel">${relStr}</div>
+        </div>
+      </td>
+      <td><span style="font-family:var(--mono);font-size:11px;">${f.totalChunks} × 9 MB</span></td>
+      <td>
+        <div class="actions">
+          <button class="act-btn copy" onclick="copyFileUrl('${f.fileId}','${shareUrl}')">Copy URL</button>
+          <button class="act-btn" onclick="openExpiryModal('${f.fileId}',${f.expiresAt},${f.createdAt},'${esc(f.name)}')">Expiry</button>
+          <button class="act-btn danger" onclick="openDeleteModal('${f.fileId}','${esc(f.name)}')">Delete</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+// ── Filter ──────────────────────────────────────
+window.setFilter = function(mode) {
+  filterMode = mode;
+  ["all","active","expired"].forEach(m => {
+    document.getElementById("filter" + m.charAt(0).toUpperCase() + m.slice(1))
+      .classList.toggle("active", m === mode);
+  });
+  renderTable();
+};
+
+// ── Copy URL ──────────────────────────────────────
+// Note: the #key fragment is NOT stored on server. If the user didn't
+// save it at upload time, they can still share the bare URL (recipient
+// needs the key separately). We store ownerTokens in localStorage.
+window.copyFileUrl = function(fileId, url) {
+  navigator.clipboard.writeText(url).then(() => showToast("URL copied!", "ok"));
+};
+
+// ── Expiry Modal ──────────────────────────────────────
+window.openExpiryModal = function(fileId, expiresAt, createdAt, name) {
+  editingFileId = fileId;
+  document.getElementById("expiryModalSub").textContent =
+    `Editing: ${name}  ·  Created ${new Date(createdAt).toLocaleDateString()}`;
+
+  // Set datetime-local input to current expiry
+  const dt = new Date(expiresAt);
+  const localIso = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000)
+    .toISOString().slice(0, 16);
+  document.getElementById("expiryDateInput").value = localIso;
+
+  // Bounds: min = createdAt + 5min, max = createdAt + 30days
+  const minDt = new Date(createdAt + 5 * 60 * 1000);
+  const maxDt = new Date(createdAt + 30 * 24 * 60 * 60 * 1000);
+  const toLocal = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+  document.getElementById("expiryDateInput").min = toLocal(minDt);
+  document.getElementById("expiryDateInput").max = toLocal(maxDt);
+
+  updatePreview();
+  document.getElementById("expiryModal").classList.add("open");
+};
+window.closeExpiryModal = function() {
+  document.getElementById("expiryModal").classList.remove("open");
+  editingFileId = null;
+};
+
+window.applyPreset = function(days) {
+  const now = new Date();
+  const dt  = new Date(now.getTime() + days * 86400000);
+  const localIso = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+  document.getElementById("expiryDateInput").value = localIso;
+  document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("sel"));
+  event.target.classList.add("sel");
+  updatePreview();
+};
+
+window.updatePreview = function() {
+  const val = document.getElementById("expiryDateInput").value;
+  const preview = document.getElementById("expiryPreview");
+  if (!val) { preview.innerHTML = " "; return; }
+  const ts = new Date(val).getTime();
+  const diff = ts - Date.now();
+  const dir  = diff > 0 ? "in " + msToHuman(diff) : timeAgo(ts) + " ago (already past)";
+  preview.innerHTML = `New expiry: <span>${new Date(val).toLocaleString()}</span> — ${dir}`;
+};
+
+window.saveExpiry = async function() {
+  const val = document.getElementById("expiryDateInput").value;
+  if (!val || !editingFileId) return;
+  const ts  = new Date(val).getTime();
+  const btn = document.getElementById("btnSaveExpiry");
+  btn.disabled = true; btn.textContent = "Saving…";
+  try {
+    await setExpiry(editingFileId, ts);
+    showToast("Expiry updated", "ok");
+    closeExpiryModal();
+    await loadFiles();
+  } catch (err) {
+    showToast("Error: " + err.message, "err");
+  } finally {
+    btn.disabled = false; btn.textContent = "Save expiry";
+  }
+};
+
+// ── Delete Modal ──────────────────────────────────────
+window.openDeleteModal = function(fileId, name) {
+  deletingFileId = fileId;
+  document.getElementById("deleteModalSub").textContent =
+    `"${name}" — all Cloudinary chunks will be removed permanently.`;
+  document.getElementById("deleteModal").classList.add("open");
+};
+window.closeDeleteModal = function() {
+  document.getElementById("deleteModal").classList.remove("open");
+  deletingFileId = null;
+};
+window.confirmDelete = async function() {
+  if (!deletingFileId) return;
+  const btn = document.getElementById("btnConfirmDelete");
+  btn.disabled = true; btn.textContent = "Deleting…";
+  try {
+    await deleteFile(deletingFileId);
+    showToast("File permanently deleted from cloud", "ok");
+    closeDeleteModal();
+    await loadFiles();
+  } catch (err) {
+    showToast("Error: " + err.message, "err");
+  } finally {
+    btn.disabled = false; btn.textContent = "Delete forever";
+  }
+};
+
+// Close modals on backdrop click
+document.getElementById("expiryModal").addEventListener("click", e => {
+  if (e.target === e.currentTarget) closeExpiryModal();
+});
+document.getElementById("deleteModal").addEventListener("click", e => {
+  if (e.target === e.currentTarget) closeDeleteModal();
+});
+
+// ── Toast ──────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = "ok") {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className   = `toast show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 3000);
+}
+window.showToast = showToast;
+
+// ── Format helpers ──────────────────────────────────────
+function fmtSize(bytes) {
+  if (!bytes) return "0 B";
+  const u = ["B","KB","MB","GB"];
+  let i = 0; let v = bytes;
+  while (v >= 1024 && i < 3) { v /= 1024; i++; }
+  return v.toFixed(i ? 1 : 0) + " " + u[i];
+}
+function msToHuman(ms) {
+  if (ms < 0) return "expired";
+  const m = Math.floor(ms / 60000);
+  const h = Math.floor(m / 60);
+  const d = Math.floor(h / 24);
+  if (d > 0) return d + "d " + (h % 24) + "h";
+  if (h > 0) return h + "h " + (m % 60) + "m";
+  return m + "m";
+}
+function timeAgo(ts) {
+  const ms = Date.now() - ts;
+  const m  = Math.floor(ms / 60000);
+  const h  = Math.floor(m / 60);
+  const d  = Math.floor(h / 24);
+  if (d > 0) return d + "d ago";
+  if (h > 0) return h + "h ago";
+  return m + "m ago";
+}
+function esc(str) {
+  return String(str).replace(/[&<>"']/g, c =>
+    ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" })[c]);
+}
 </script>
 </body>
 </html>
