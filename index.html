@@ -10,34 +10,30 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg:        #080b12;
-  --panel:     #0d1120;
-  --border:    rgba(255,255,255,0.06);
-  --border2:   rgba(255,255,255,0.12);
-  --accent:    #5b6af5;
-  --accent2:   #8b5cf6;
-  --green:     #22d3ae;
-  --amber:     #f59e0b;
-  --red:       #f43f5e;
-  --text:      #e2e8f0;
-  --muted:     #5a6578;
-  --mono:      'Space Mono', monospace;
-  --sans:      'Syne', sans-serif;
-  --radius:    10px;
-  --sidebar:   220px;
+  --bg:      #080b12;
+  --panel:   #0d1120;
+  --border:  rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --accent:  #5b6af5;
+  --accent2: #8b5cf6;
+  --green:   #22d3ae;
+  --amber:   #f59e0b;
+  --red:     #f43f5e;
+  --text:    #e2e8f0;
+  --muted:   #5a6578;
+  --mono:    'Space Mono', monospace;
+  --sans:    'Syne', sans-serif;
+  --radius:  10px;
+  --sidebar: 220px;
 }
 html, body { height: 100%; }
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 14px;
-  overflow-x: hidden;
-  min-height: 100vh;
+  background: var(--bg); color: var(--text);
+  font-family: var(--sans); font-size: 14px;
+  overflow-x: hidden; min-height: 100vh;
 }
 body::before {
-  content: '';
-  position: fixed; inset: 0;
+  content: ''; position: fixed; inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
   pointer-events: none; z-index: 0;
 }
@@ -46,28 +42,25 @@ body::before {
 .shell { display: flex; min-height: 100vh; position: relative; z-index: 1; }
 
 .sidebar {
-  width: var(--sidebar);
-  background: var(--panel);
+  width: var(--sidebar); background: var(--panel);
   border-right: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  padding: 28px 0;
-  position: fixed; top: 0; left: 0; bottom: 0;
-  z-index: 100;
+  display: flex; flex-direction: column; padding: 28px 0;
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
 }
 .logo { padding: 0 24px 28px; border-bottom: 1px solid var(--border); }
 .logo-badge {
   display: inline-flex; align-items: center; gap: 6px;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   color: #fff; font-family: var(--mono); font-size: 9px; font-weight: 700;
-  letter-spacing: .12em; padding: 4px 9px; border-radius: 4px; margin-bottom: 10px;
-  text-transform: uppercase;
+  letter-spacing: .12em; padding: 4px 9px; border-radius: 4px;
+  margin-bottom: 10px; text-transform: uppercase;
 }
 .logo-badge::before { content: '◆'; font-size: 8px; }
 .logo h1 {
   font-size: 22px; font-weight: 800; letter-spacing: -.02em;
   background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  font-family: var(--sans);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; font-family: var(--sans);
 }
 .nav { padding: 20px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
 .nav-item {
@@ -91,268 +84,324 @@ body::before {
 .page.active { display: block; }
 
 /* ── STAT CARDS ── */
-.stat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 32px; }
+.stat-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; margin-bottom: 32px; }
 .stat-card {
   background: var(--panel); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 20px 20px 18px;
   position: relative; overflow: hidden; transition: border-color .2s;
 }
 .stat-card:hover { border-color: var(--border2); }
-.stat-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
-.stat-card.c-total::after  { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
-.stat-card.c-active::after { background: var(--green); }
+.stat-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+.stat-card.c-total::after    { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.stat-card.c-active::after   { background: var(--green); }
 .stat-card.c-expiring::after { background: var(--amber); }
 .stat-card.c-expired::after  { background: var(--red); }
-.stat-card.c-size::after    { background: linear-gradient(90deg, #38bdf8, #818cf8); }
-.stat-label { font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
-.stat-val { font-family: var(--mono); font-size: 26px; font-weight: 700; color: #fff; line-height: 1; }
-.stat-val.loading { display: inline-block; width: 40px; height: 3px; background: var(--border2); border-radius: 2px; vertical-align: middle; }
+.stat-card.c-size::after     { background: linear-gradient(90deg, #38bdf8, #818cf8); }
+.stat-label { font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
+.stat-val { font-family:var(--mono); font-size:26px; font-weight:700; color:#fff; line-height:1; }
+.stat-val.loading { display:inline-block; width:40px; height:3px; background:var(--border2); border-radius:2px; vertical-align:middle; }
 
 /* ── TOOLBAR ── */
-.toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
-.search-wrap { flex: 1; min-width: 200px; position: relative; }
-.search-wrap .ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none; }
+.toolbar { display:flex; align-items:center; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
+.search-wrap { flex:1; min-width:200px; position:relative; }
+.search-wrap .ico { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:14px; pointer-events:none; }
 .search-input {
-  width: 100%; background: var(--panel); border: 1px solid var(--border);
-  color: var(--text); font-family: var(--sans); font-size: 14px;
-  padding: 10px 14px 10px 38px; border-radius: var(--radius); outline: none; transition: border-color .18s;
+  width:100%; background:var(--panel); border:1px solid var(--border);
+  color:var(--text); font-family:var(--sans); font-size:14px;
+  padding:10px 14px 10px 38px; border-radius:var(--radius); outline:none; transition:border-color .18s;
 }
-.search-input::placeholder { color: var(--muted); }
-.search-input:focus { border-color: var(--accent); }
-.filter-btns { display: flex; gap: 6px; }
+.search-input::placeholder { color:var(--muted); }
+.search-input:focus { border-color:var(--accent); }
+.filter-btns { display:flex; gap:6px; }
 .filter-btn {
-  padding: 9px 16px; border-radius: var(--radius); font-family: var(--sans);
-  font-size: 13px; font-weight: 600; border: 1px solid var(--border);
-  background: transparent; color: var(--muted); cursor: pointer; transition: all .15s;
+  padding:9px 16px; border-radius:var(--radius); font-family:var(--sans); font-size:13px; font-weight:600;
+  border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; transition:all .15s;
 }
-.filter-btn:hover { color: var(--text); border-color: var(--border2); }
-.filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.filter-btn:hover { color:var(--text); border-color:var(--border2); }
+.filter-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
 .btn-refresh {
-  display: flex; align-items: center; gap: 7px;
-  padding: 9px 18px; background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff; border: none; border-radius: var(--radius); font-family: var(--sans);
-  font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity .15s, transform .12s;
+  display:flex; align-items:center; gap:7px; padding:9px 18px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff; border:none; border-radius:var(--radius); font-family:var(--sans);
+  font-size:13px; font-weight:700; cursor:pointer; transition:opacity .15s, transform .12s;
 }
-.btn-refresh:hover { opacity: .9; transform: translateY(-1px); }
-.btn-refresh:active { transform: scale(.97); }
-.btn-refresh.spinning .spin-icon { animation: spin .6s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.btn-refresh:hover { opacity:.9; transform:translateY(-1px); }
+.btn-refresh:active { transform:scale(.97); }
+.btn-refresh.spinning .spin-icon { animation:spin .6s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
 
 /* ── FILE TABLE ── */
-.table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.table-wrap { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
 .table-head {
-  display: grid; grid-template-columns: 2.5fr 1fr 1.4fr .9fr 1.6fr;
-  padding: 12px 20px; border-bottom: 1px solid var(--border);
-  font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+  display:grid;
+  grid-template-columns: 2.2fr 1fr 1.3fr .7fr .9fr 1.6fr;
+  padding:12px 20px; border-bottom:1px solid var(--border);
+  font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
 }
-.file-rows { min-height: 180px; }
+.file-rows { min-height:180px; }
 .file-row {
-  display: grid; grid-template-columns: 2.5fr 1fr 1.4fr .9fr 1.6fr;
-  padding: 14px 20px; border-bottom: 1px solid var(--border);
-  align-items: center; transition: background .15s; animation: rowIn .25s ease both;
+  display:grid;
+  grid-template-columns: 2.2fr 1fr 1.3fr .7fr .9fr 1.6fr;
+  padding:14px 20px; border-bottom:1px solid var(--border);
+  align-items:center; transition:background .15s; animation:rowIn .25s ease both;
 }
-.file-row:last-child { border-bottom: none; }
-.file-row:hover { background: rgba(255,255,255,.025); }
-@keyframes rowIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-.file-name-cell { display: flex; align-items: center; gap: 10px; }
+.file-row:last-child { border-bottom:none; }
+.file-row:hover { background:rgba(255,255,255,.025); }
+@keyframes rowIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+.file-name-cell { display:flex; align-items:center; gap:10px; }
 .file-icon {
-  width: 34px; height: 34px; border-radius: 7px;
-  background: rgba(91,106,245,.15); border: 1px solid rgba(91,106,245,.25);
-  display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
+  width:34px; height:34px; border-radius:7px;
+  background:rgba(91,106,245,.15); border:1px solid rgba(91,106,245,.25);
+  display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;
 }
-.file-name { font-weight: 600; font-size: 13px; color: var(--text); line-height: 1.2; }
-.file-size { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 2px; }
+.file-name { font-weight:600; font-size:13px; color:var(--text); line-height:1.3; }
+.file-size { font-family:var(--mono); font-size:10px; color:var(--muted); margin-top:2px; }
+.one-time-tag {
+  display:inline-block; font-family:var(--mono); font-size:9px; font-weight:700;
+  color:var(--red); background:rgba(244,63,94,.1); border:1px solid rgba(244,63,94,.2);
+  padding:1px 6px; border-radius:3px; margin-top:3px; letter-spacing:.06em;
+}
+
 .badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 4px 9px; border-radius: 5px; font-family: var(--mono);
-  font-size: 10px; font-weight: 700; letter-spacing: .06em;
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 9px; border-radius:5px; font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.06em;
 }
-.badge::before { content: '●'; font-size: 7px; }
-.badge-active   { background: rgba(34,211,174,.1); color: var(--green); border: 1px solid rgba(34,211,174,.2); }
-.badge-expiring { background: rgba(245,158,11,.1);  color: var(--amber); border: 1px solid rgba(245,158,11,.2); }
-.badge-expired  { background: rgba(244,63,94,.1);   color: var(--red);   border: 1px solid rgba(244,63,94,.2); }
-.expiry-cell { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-.expiry-cell .days { color: var(--text); font-weight: 700; font-size: 13px; }
-.chunks-cell { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-.action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-.action-btn {
-  padding: 6px 11px; border-radius: 6px; font-size: 12px; font-weight: 700;
-  font-family: var(--sans); cursor: pointer; transition: all .15s; border: 1px solid transparent;
+.badge::before { content:'●'; font-size:7px; }
+.badge-active   { background:rgba(34,211,174,.1); color:var(--green); border:1px solid rgba(34,211,174,.2); }
+.badge-expiring { background:rgba(245,158,11,.1); color:var(--amber); border:1px solid rgba(245,158,11,.2); }
+.badge-expired  { background:rgba(244,63,94,.1);  color:var(--red);   border:1px solid rgba(244,63,94,.2); }
+
+.expiry-cell { font-family:var(--mono); font-size:11px; color:var(--muted); }
+.expiry-cell .days { color:var(--text); font-weight:700; font-size:13px; }
+.chunks-cell { font-family:var(--mono); font-size:11px; color:var(--muted); }
+
+/* download count cell */
+.dl-count-cell { font-family:var(--mono); font-size:13px; }
+.dl-num { color:var(--text); font-weight:700; }
+.dl-label { font-size:9px; color:var(--muted); margin-left:2px; }
+/* flash animation when count updates live */
+@keyframes countFlash {
+  0%   { color: var(--green); }
+  100% { color: var(--text);  }
 }
-.btn-copy   { background: rgba(91,106,245,.15); color: var(--accent); border-color: rgba(91,106,245,.25); }
-.btn-copy:hover  { background: rgba(91,106,245,.28); }
-.btn-delete { background: rgba(244,63,94,.1); color: var(--red); border-color: rgba(244,63,94,.2); }
-.btn-delete:hover { background: rgba(244,63,94,.22); }
-.btn-expiry { background: rgba(245,158,11,.1); color: var(--amber); border-color: rgba(245,158,11,.2); }
-.btn-expiry:hover { background: rgba(245,158,11,.22); }
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; gap: 10px; color: var(--muted); }
-.empty-state .big-icon { font-size: 40px; opacity: .3; }
-.empty-state p { font-size: 14px; font-family: var(--mono); }
-.spinner-wrap { display: flex; align-items: center; justify-content: center; padding: 60px; }
-.spinner { width: 28px; height: 28px; border: 3px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+.dl-num.flash { animation: countFlash .8s ease; }
+
+.action-btns { display:flex; gap:5px; flex-wrap:wrap; }
+.action-btn { padding:6px 10px; border-radius:6px; font-size:11px; font-weight:700; font-family:var(--sans); cursor:pointer; transition:all .15s; border:1px solid transparent; white-space:nowrap; }
+.btn-copy   { background:rgba(91,106,245,.15); color:var(--accent); border-color:rgba(91,106,245,.25); }
+.btn-copy:hover { background:rgba(91,106,245,.28); }
+.btn-delete { background:rgba(244,63,94,.1); color:var(--red); border-color:rgba(244,63,94,.2); }
+.btn-delete:hover { background:rgba(244,63,94,.22); }
+.btn-expiry { background:rgba(245,158,11,.1); color:var(--amber); border-color:rgba(245,158,11,.2); }
+.btn-expiry:hover { background:rgba(245,158,11,.22); }
+
+.empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; gap:10px; color:var(--muted); }
+.empty-state .big-icon { font-size:40px; opacity:.3; }
+.empty-state p { font-size:14px; font-family:var(--mono); }
+.spinner-wrap { display:flex; align-items:center; justify-content:center; padding:60px; }
+.spinner { width:28px; height:28px; border:3px solid var(--border2); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; }
 
 /* ── UPLOAD PAGE ── */
-.upload-layout { display: grid; grid-template-columns: 1fr 360px; gap: 28px; align-items: start; }
+.upload-layout { display:grid; grid-template-columns:1fr 360px; gap:28px; align-items:start; }
 .drop-zone {
-  border: 2px dashed var(--border2); border-radius: 14px; padding: 64px 32px;
-  text-align: center; cursor: pointer; transition: all .2s; background: var(--panel);
-  position: relative; overflow: hidden;
+  border:2px dashed var(--border2); border-radius:14px; padding:64px 32px;
+  text-align:center; cursor:pointer; transition:all .2s; background:var(--panel);
+  position:relative; overflow:hidden;
 }
 .drop-zone::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 0%, rgba(91,106,245,.07) 0%, transparent 70%);
-  pointer-events: none;
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse at 50% 0%, rgba(91,106,245,.07) 0%, transparent 70%);
+  pointer-events:none;
 }
-.drop-zone:hover, .drop-zone.dragover { border-color: var(--accent); background: rgba(91,106,245,.04); }
-.drop-zone.dragover { transform: scale(1.01); }
-.drop-icon { font-size: 48px; margin-bottom: 16px; display: block; }
-.drop-title { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px; }
-.drop-sub { color: var(--muted); font-size: 13px; line-height: 1.5; font-family: var(--mono); }
-.drop-sub span { color: var(--accent); cursor: pointer; }
-.file-input { display: none; }
-.upload-progress-wrap { margin-top: 24px; display: none; }
-.upload-progress-wrap.active { display: block; }
-.progress-track { height: 4px; background: var(--border2); border-radius: 4px; overflow: hidden; margin-bottom: 10px; }
-.progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; width: 0%; transition: width .3s; }
-.progress-label { font-family: var(--mono); font-size: 11px; color: var(--muted); }
-.upload-queue { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
-.queue-item { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
-.queue-icon { font-size: 22px; }
-.queue-info { flex: 1; }
-.queue-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
-.queue-meta { font-family: var(--mono); font-size: 10px; color: var(--muted); }
-.queue-status { font-family: var(--mono); font-size: 11px; font-weight: 700; }
-.queue-status.done    { color: var(--green); }
-.queue-status.fail    { color: var(--red); }
-.queue-status.pending { color: var(--amber); }
-.queue-status.uploading { color: var(--accent); }
-.settings-panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
-.settings-panel h3 { font-size: 14px; font-weight: 800; letter-spacing: .01em; margin-bottom: 20px; color: var(--text); }
-.field { margin-bottom: 18px; }
-.field label { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+.drop-zone:hover, .drop-zone.dragover { border-color:var(--accent); background:rgba(91,106,245,.04); }
+.drop-zone.dragover { transform:scale(1.01); }
+.drop-icon { font-size:48px; margin-bottom:16px; display:block; }
+.drop-title { font-size:20px; font-weight:800; color:#fff; margin-bottom:8px; }
+.drop-sub { color:var(--muted); font-size:13px; line-height:1.5; font-family:var(--mono); }
+.drop-sub span { color:var(--accent); cursor:pointer; }
+.file-input { display:none; }
+
+.upload-progress-wrap { margin-top:24px; display:none; }
+.upload-progress-wrap.active { display:block; }
+.progress-track { height:4px; background:var(--border2); border-radius:4px; overflow:hidden; margin-bottom:10px; }
+.progress-bar { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:4px; width:0%; transition:width .3s; }
+.progress-label { font-family:var(--mono); font-size:11px; color:var(--muted); }
+
+.key-reveal-box {
+  margin-top:18px; background:rgba(34,211,174,.07);
+  border:1px solid rgba(34,211,174,.25); border-radius:var(--radius); padding:18px; display:none;
+}
+.key-reveal-box.show { display:block; }
+.key-reveal-label { font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--green); margin-bottom:8px; }
+.key-reveal-val {
+  font-family:var(--mono); font-size:13px; color:#fff;
+  background:rgba(0,0,0,.3); padding:10px 12px; border-radius:6px;
+  word-break:break-all; line-height:1.6; cursor:pointer; border:1px solid var(--border2);
+  transition:background .15s;
+}
+.key-reveal-val:hover { background:rgba(91,106,245,.15); }
+.key-reveal-note { font-family:var(--mono); font-size:10px; color:var(--muted); margin-top:8px; line-height:1.5; }
+
+.upload-queue { margin-top:18px; display:flex; flex-direction:column; gap:10px; }
+.queue-item { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; display:flex; align-items:center; gap:12px; }
+.queue-icon { font-size:22px; }
+.queue-info { flex:1; }
+.queue-name { font-size:13px; font-weight:600; color:var(--text); margin-bottom:3px; }
+.queue-meta { font-family:var(--mono); font-size:10px; color:var(--muted); }
+.queue-status { font-family:var(--mono); font-size:11px; font-weight:700; }
+.queue-status.done      { color:var(--green); }
+.queue-status.fail      { color:var(--red); }
+.queue-status.pending   { color:var(--amber); }
+.queue-status.uploading { color:var(--accent); }
+
+.settings-panel { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:24px; }
+.settings-panel h3 { font-size:14px; font-weight:800; letter-spacing:.01em; margin-bottom:20px; color:var(--text); }
+.field { margin-bottom:18px; }
+.field label { display:block; font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:7px; }
 .field select, .field input[type="number"], .field input[type="text"], .field input[type="password"] {
-  width: 100%; background: rgba(255,255,255,.04); border: 1px solid var(--border);
-  color: var(--text); font-family: var(--mono); font-size: 13px;
-  padding: 10px 12px; border-radius: 7px; outline: none; transition: border-color .18s; appearance: none;
+  width:100%; background:rgba(255,255,255,.04); border:1px solid var(--border);
+  color:var(--text); font-family:var(--mono); font-size:13px;
+  padding:10px 12px; border-radius:7px; outline:none; transition:border-color .18s; appearance:none;
 }
-.field select:focus, .field input:focus { border-color: var(--accent); }
-.field select option { background: #0d1120; }
+.field select:focus, .field input:focus { border-color:var(--accent); }
+.field select option { background:#0d1120; }
+.field-hint { font-family:var(--mono); font-size:9px; color:var(--muted); margin-top:5px; line-height:1.5; }
+
+/* one-time toggle styling */
+.one-time-select-wrap select { border-color: rgba(244,63,94,.3); }
+.one-time-select-wrap select:focus { border-color: var(--red); }
+
 .btn-upload-start {
-  width: 100%; padding: 12px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff; border: none; border-radius: var(--radius);
-  font-family: var(--sans); font-size: 15px; font-weight: 800;
-  cursor: pointer; transition: all .18s; margin-top: 8px;
+  width:100%; padding:12px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff; border:none; border-radius:var(--radius);
+  font-family:var(--sans); font-size:15px; font-weight:800;
+  cursor:pointer; transition:all .18s; margin-top:8px;
 }
-.btn-upload-start:hover { opacity: .9; transform: translateY(-1px); }
-.btn-upload-start:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+.btn-upload-start:hover { opacity:.9; transform:translateY(-1px); }
+.btn-upload-start:disabled { opacity:.4; cursor:not-allowed; transform:none; }
 
 /* ── DECRYPT PAGE ── */
-.decrypt-wrap {
-  max-width: 560px; margin: 0 auto; padding: 60px 0;
-}
+.decrypt-wrap { max-width:520px; margin:0 auto; padding:30px 0; }
 .decrypt-card {
-  background: var(--panel); border: 1px solid var(--border2);
-  border-radius: 16px; padding: 40px;
-  position: relative; overflow: hidden;
+  background:var(--panel); border:1px solid var(--border2);
+  border-radius:16px; padding:40px; position:relative; overflow:hidden;
 }
 .decrypt-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
 }
-.decrypt-icon { font-size: 48px; margin-bottom: 20px; display: block; text-align: center; }
-.decrypt-card h3 { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 8px; text-align: center; }
-.decrypt-card .file-meta { text-align: center; color: var(--muted); font-family: var(--mono); font-size: 12px; margin-bottom: 28px; line-height: 1.6; }
-.decrypt-card .file-meta strong { color: var(--text); }
-.decrypt-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+.decrypt-icon { font-size:48px; margin-bottom:20px; display:block; text-align:center; }
+.decrypt-card h3 { font-size:22px; font-weight:800; color:#fff; margin-bottom:8px; text-align:center; }
+.decrypt-card .file-meta { text-align:center; color:var(--muted); font-family:var(--mono); font-size:12px; margin-bottom:20px; line-height:1.6; }
+.decrypt-card .file-meta strong { color:var(--text); }
+
+/* one-time warning on decrypt page */
+.one-time-warning {
+  background:rgba(244,63,94,.08); border:1px solid rgba(244,63,94,.3);
+  border-radius:8px; padding:12px 16px; margin-bottom:16px;
+  font-family:var(--mono); font-size:11px; color:var(--red); line-height:1.6;
+  display:none;
+}
+.one-time-warning.show { display:block; }
+
+.decrypt-divider { border:none; border-top:1px solid var(--border); margin:20px 0; }
+.info-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); }
+.info-row:last-child { border-bottom:none; }
+.info-label { font-family:var(--mono); font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; }
+.info-val { font-family:var(--mono); font-size:12px; color:var(--text); }
+
+.auth-notice {
+  background:rgba(91,106,245,.08); border:1px solid rgba(91,106,245,.2);
+  border-radius:8px; padding:12px 16px; margin-bottom:18px;
+  font-family:var(--mono); font-size:11px; color:var(--accent); line-height:1.6;
+}
 .btn-decrypt {
-  width: 100%; padding: 13px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff; border: none; border-radius: var(--radius);
-  font-family: var(--sans); font-size: 15px; font-weight: 800;
-  cursor: pointer; transition: all .18s; margin-top: 8px;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width:100%; padding:13px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff; border:none; border-radius:var(--radius);
+  font-family:var(--sans); font-size:15px; font-weight:800;
+  cursor:pointer; transition:all .18s; margin-top:8px;
+  display:flex; align-items:center; justify-content:center; gap:8px;
 }
-.btn-decrypt:hover { opacity: .9; transform: translateY(-1px); }
-.btn-decrypt:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+.btn-decrypt:hover { opacity:.9; transform:translateY(-1px); }
+.btn-decrypt:disabled { opacity:.4; cursor:not-allowed; transform:none; }
 .decrypt-error {
-  background: rgba(244,63,94,.1); border: 1px solid rgba(244,63,94,.25);
-  color: var(--red); padding: 12px 16px; border-radius: 8px;
-  font-family: var(--mono); font-size: 12px; margin-top: 14px; display: none;
+  background:rgba(244,63,94,.1); border:1px solid rgba(244,63,94,.25);
+  color:var(--red); padding:12px 16px; border-radius:8px;
+  font-family:var(--mono); font-size:12px; margin-top:14px; display:none; line-height:1.5;
 }
-.decrypt-error.show { display: block; }
+.decrypt-error.show { display:block; }
 .decrypt-success {
-  background: rgba(34,211,174,.1); border: 1px solid rgba(34,211,174,.25);
-  color: var(--green); padding: 12px 16px; border-radius: 8px;
-  font-family: var(--mono); font-size: 12px; margin-top: 14px; text-align: center; display: none;
+  background:rgba(34,211,174,.1); border:1px solid rgba(34,211,174,.25);
+  color:var(--green); padding:12px 16px; border-radius:8px;
+  font-family:var(--mono); font-size:12px; margin-top:14px; text-align:center; display:none;
 }
-.decrypt-success.show { display: block; }
-.info-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
-.info-row:last-child { border-bottom: none; }
-.info-label { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
-.info-val { font-family: var(--mono); font-size: 12px; color: var(--text); }
+.decrypt-success.show { display:block; }
+.attempts-warn {
+  font-family:var(--mono); font-size:10px; color:var(--amber);
+  margin-top:8px; text-align:center; display:none;
+}
+.attempts-warn.show { display:block; }
 
 /* ── MODAL ── */
 .modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.7);
-  backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center;
-  z-index: 999; opacity: 0; pointer-events: none; transition: opacity .2s;
+  position:fixed; inset:0; background:rgba(0,0,0,.7);
+  backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center;
+  z-index:999; opacity:0; pointer-events:none; transition:opacity .2s;
 }
-.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-overlay.open { opacity:1; pointer-events:all; }
 .modal {
-  background: var(--panel); border: 1px solid var(--border2);
-  border-radius: 14px; padding: 32px; width: 420px; max-width: 90vw;
-  transform: scale(.95) translateY(10px); transition: transform .2s;
+  background:var(--panel); border:1px solid var(--border2);
+  border-radius:14px; padding:32px; width:420px; max-width:90vw;
+  transform:scale(.95) translateY(10px); transition:transform .2s;
 }
-.modal-overlay.open .modal { transform: none; }
-.modal h3 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
-.modal p  { color: var(--muted); font-size: 13px; margin-bottom: 22px; font-family: var(--mono); }
-.modal .field { margin-bottom: 14px; }
-.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
-.btn-cancel { padding: 10px 18px; background: transparent; border: 1px solid var(--border2); color: var(--muted); border-radius: var(--radius); font-family: var(--sans); font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; }
-.btn-cancel:hover { color: var(--text); }
-.btn-confirm { padding: 10px 22px; background: var(--accent); border: none; color: #fff; border-radius: var(--radius); font-family: var(--sans); font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .15s; }
-.btn-confirm:hover { opacity: .85; }
-.btn-confirm.danger { background: var(--red); }
-
-/* ── AUTH GATE (share link page) ── */
-.auth-notice {
-  background: rgba(91,106,245,.08); border: 1px solid rgba(91,106,245,.2);
-  border-radius: 8px; padding: 12px 16px; margin-bottom: 18px;
-  font-family: var(--mono); font-size: 11px; color: var(--accent); line-height: 1.6;
-}
+.modal-overlay.open .modal { transform:none; }
+.modal h3 { font-size:20px; font-weight:800; margin-bottom:8px; }
+.modal p  { color:var(--muted); font-size:13px; margin-bottom:22px; font-family:var(--mono); }
+.modal .field { margin-bottom:14px; }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:22px; }
+.btn-cancel { padding:10px 18px; background:transparent; border:1px solid var(--border2); color:var(--muted); border-radius:var(--radius); font-family:var(--sans); font-size:14px; font-weight:600; cursor:pointer; transition:all .15s; }
+.btn-cancel:hover { color:var(--text); }
+.btn-confirm { padding:10px 22px; background:var(--accent); border:none; color:#fff; border-radius:var(--radius); font-family:var(--sans); font-size:14px; font-weight:700; cursor:pointer; transition:opacity .15s; }
+.btn-confirm:hover { opacity:.85; }
+.btn-confirm.danger { background:var(--red); }
 
 /* ── TOAST ── */
-.toast-container { position: fixed; bottom: 28px; right: 28px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+.toast-container { position:fixed; bottom:28px; right:28px; z-index:2000; display:flex; flex-direction:column; gap:8px; }
 .toast {
-  padding: 12px 18px; background: var(--panel); border: 1px solid var(--border2);
-  border-radius: var(--radius); font-family: var(--mono); font-size: 12px; color: var(--text);
-  animation: toastIn .2s ease; min-width: 220px; display: flex; align-items: center; gap: 9px;
-  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  padding:12px 18px; background:var(--panel); border:1px solid var(--border2);
+  border-radius:var(--radius); font-family:var(--mono); font-size:12px; color:var(--text);
+  animation:toastIn .2s ease; min-width:220px; display:flex; align-items:center; gap:9px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
 }
-.toast-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.toast.success .toast-dot { background: var(--green); }
-.toast.error   .toast-dot { background: var(--red); }
-.toast.info    .toast-dot { background: var(--accent); }
-@keyframes toastIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform:none; } }
+.toast-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.toast.success .toast-dot { background:var(--green); }
+.toast.error   .toast-dot { background:var(--red); }
+.toast.info    .toast-dot { background:var(--accent); }
+@keyframes toastIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
 
-.ws-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); display: inline-block; margin-right: 6px; transition: background .4s; }
-.ws-dot.connected { background: var(--green); animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+.ws-dot { width:7px; height:7px; border-radius:50%; background:var(--red); display:inline-block; margin-right:6px; transition:background .4s; }
+.ws-dot.connected { background:var(--green); animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
 
-@media (max-width: 1100px) {
-  .stat-grid { grid-template-columns: repeat(3,1fr); }
-  .upload-layout { grid-template-columns: 1fr; }
+@media (max-width:1200px) {
+  .stat-grid { grid-template-columns:repeat(3,1fr); }
+  .upload-layout { grid-template-columns:1fr; }
+  .table-head, .file-row { grid-template-columns: 2fr 1fr 1.2fr .9fr 1.5fr; }
+  .table-head .col-chunks, .file-row .col-chunks { display:none; }
 }
-@media (max-width: 800px) {
-  .main { padding: 24px 18px; }
-  .table-head, .file-row { grid-template-columns: 2fr 1fr 1fr; }
+@media (max-width:800px) {
+  .main { padding:24px 18px; }
+  .table-head, .file-row { grid-template-columns: 2fr 1fr 1.4fr; }
   .table-head .col-chunks, .file-row .col-chunks,
-  .table-head .col-expiry, .file-row .col-expiry { display: none; }
+  .table-head .col-expiry, .file-row .col-expiry,
+  .table-head .col-dlcount, .file-row .col-dlcount { display:none; }
 }
 </style>
 </head>
@@ -360,7 +409,7 @@ body::before {
 
 <div class="shell">
 
-  <!-- SIDEBAR -->
+  <!-- ── SIDEBAR ── -->
   <aside class="sidebar">
     <div class="logo">
       <div class="logo-badge">Secure</div>
@@ -384,37 +433,24 @@ body::before {
     </div>
   </aside>
 
-  <!-- MAIN -->
+  <!-- ── MAIN ── -->
   <main class="main">
 
-    <!-- ═══ MY FILES PAGE ═══ -->
+    <!-- ═══ MY FILES ═══ -->
     <div class="page active" id="page-files">
       <div class="page-header">
         <h2>My Files</h2>
         <p id="filesSubtitle">Loading your secure vault…</p>
       </div>
+
       <div class="stat-grid">
-        <div class="stat-card c-total">
-          <div class="stat-label">Total Uploads</div>
-          <div class="stat-val loading" id="statTotal"></div>
-        </div>
-        <div class="stat-card c-active">
-          <div class="stat-label">Active</div>
-          <div class="stat-val loading" id="statActive"></div>
-        </div>
-        <div class="stat-card c-expiring">
-          <div class="stat-label">Expiring Soon</div>
-          <div class="stat-val loading" id="statExpiring"></div>
-        </div>
-        <div class="stat-card c-expired">
-          <div class="stat-label">Expired</div>
-          <div class="stat-val loading" id="statExpired"></div>
-        </div>
-        <div class="stat-card c-size">
-          <div class="stat-label">Total Size</div>
-          <div class="stat-val loading" id="statSize"></div>
-        </div>
+        <div class="stat-card c-total">   <div class="stat-label">Total Uploads</div><div class="stat-val loading" id="statTotal"></div></div>
+        <div class="stat-card c-active">  <div class="stat-label">Active</div>       <div class="stat-val loading" id="statActive"></div></div>
+        <div class="stat-card c-expiring"><div class="stat-label">Expiring Soon</div><div class="stat-val loading" id="statExpiring"></div></div>
+        <div class="stat-card c-expired"> <div class="stat-label">Expired</div>      <div class="stat-val loading" id="statExpired"></div></div>
+        <div class="stat-card c-size">    <div class="stat-label">Total Size</div>   <div class="stat-val loading" id="statSize"></div></div>
       </div>
+
       <div class="toolbar">
         <div class="search-wrap">
           <span class="ico">🔍</span>
@@ -429,12 +465,14 @@ body::before {
           <span class="spin-icon">↻</span> Refresh
         </button>
       </div>
+
       <div class="table-wrap">
         <div class="table-head">
           <div>File</div>
           <div>Status</div>
-          <div>Expiry</div>
+          <div class="col-expiry">Expiry</div>
           <div class="col-chunks">Chunks</div>
+          <div class="col-dlcount">Downloads</div>
           <div>Actions</div>
         </div>
         <div class="file-rows" id="fileRows">
@@ -443,11 +481,11 @@ body::before {
       </div>
     </div>
 
-    <!-- ═══ UPLOAD PAGE ═══ -->
+    <!-- ═══ UPLOAD ═══ -->
     <div class="page" id="page-upload">
       <div class="page-header">
         <h2>Upload File</h2>
-        <p>Encrypted chunked upload to secure cloud storage</p>
+        <p>Chunked upload — key verified server-side on every download</p>
       </div>
       <div class="upload-layout">
         <div>
@@ -457,21 +495,36 @@ body::before {
                ondrop="handleDrop(event)"
                onclick="document.getElementById('fileInput').click()">
             <span class="drop-icon">🔒</span>
-            <div class="drop-title">Drop files to encrypt & upload</div>
+            <div class="drop-title">Drop files to upload</div>
             <div class="drop-sub">
               Drag & drop or <span>browse files</span><br/>
-              Files are chunked (≤9.5 MB/chunk) and stored encrypted
+              Files are chunked (≤9.5 MB/chunk) and stored in the cloud
             </div>
             <input type="file" id="fileInput" class="file-input" multiple onchange="handleFileSelect(event)"/>
           </div>
+
           <div class="upload-progress-wrap" id="uploadProgressWrap">
             <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
             <div class="progress-label" id="progressLabel">Preparing…</div>
           </div>
+
+          <!-- Key reveal box -->
+          <div class="key-reveal-box" id="keyRevealBox">
+            <div class="key-reveal-label">🔑 Decryption Key — share with recipients</div>
+            <div class="key-reveal-val" id="keyRevealVal" onclick="copyKeyToClipboard()" title="Click to copy"></div>
+            <div class="key-reveal-note">
+              ⚠ Save this key now — it is never stored on the server.<br/>
+              Recipients must enter it to download the file.
+            </div>
+          </div>
+
           <div class="upload-queue" id="uploadQueue"></div>
         </div>
+
+        <!-- Settings panel -->
         <div class="settings-panel">
           <h3>Upload Settings</h3>
+
           <div class="field">
             <label>Expiry Duration</label>
             <select id="expiryPreset" onchange="updateExpiryCustom()">
@@ -484,15 +537,18 @@ body::before {
               <option value="custom">Custom…</option>
             </select>
           </div>
+
           <div class="field" id="customExpiryField" style="display:none;">
             <label>Custom (minutes)</label>
-            <input type="number" id="customExpiryMin" min="5" max="43200" value="1440" placeholder="Minutes"/>
+            <input type="number" id="customExpiryMin" min="5" max="43200" value="1440"/>
           </div>
+
           <div class="field">
             <label>Encryption Key (optional)</label>
             <input type="text" id="encryptionKey" placeholder="Leave blank to auto-generate" autocomplete="off"/>
-            <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:5px;">Recipients will need this key to download the file.</div>
+            <div class="field-hint">Server verifies this key before serving any download.</div>
           </div>
+
           <div class="field">
             <label>Chunk Size</label>
             <select id="chunkSizeSel">
@@ -501,6 +557,19 @@ body::before {
               <option value="9961472" selected>9.5 MB (max)</option>
             </select>
           </div>
+
+          <div class="field one-time-select-wrap">
+            <label>One-Time Download</label>
+            <select id="oneTimeSelect">
+              <option value="false">No — multiple downloads allowed</option>
+              <option value="true">Yes — self-destruct after first download 💥</option>
+            </select>
+            <div class="field-hint">
+              If enabled, the file and all chunks are permanently deleted from the server
+              the moment the first successful download completes.
+            </div>
+          </div>
+
           <button class="btn-upload-start" id="uploadStartBtn" onclick="startUploads()" disabled>
             Select files first
           </button>
@@ -512,32 +581,38 @@ body::before {
     <div class="page" id="page-decrypt">
       <div class="page-header">
         <h2>Secure Download</h2>
-        <p>Enter your decryption key to access this file</p>
+        <p>Enter the decryption key — verified server-side before download begins</p>
       </div>
       <div class="decrypt-wrap">
-        <div class="decrypt-card" id="decryptCard">
+        <div class="decrypt-card">
           <span class="decrypt-icon">🔐</span>
           <h3 id="decryptFileName">Loading file…</h3>
           <div class="file-meta" id="decryptFileMeta"></div>
 
-          <div style="margin-bottom: 20px;" id="decryptInfoBlock"></div>
+          <!-- shown only for one-time files -->
+          <div class="one-time-warning" id="oneTimeWarning">
+            💥 ONE-TIME FILE — This file will be permanently deleted from the server
+            the moment your download completes. You cannot download it again.
+          </div>
 
+          <div id="decryptInfoBlock"></div>
           <hr class="decrypt-divider"/>
 
           <div class="auth-notice">
-            🔑 This file is encrypted. You need the decryption key provided by the uploader to access it.
+            🔑 Your key is sent to the server for verification. The file is only served if the key is correct.
           </div>
 
           <div class="field">
             <label>Decryption Key</label>
-            <input type="password" id="decryptKeyInput" placeholder="Enter decryption key…" autocomplete="off"/>
+            <input type="password" id="decryptKeyInput" placeholder="Enter decryption key…"
+                   autocomplete="off" onkeydown="if(event.key==='Enter')attemptDecrypt()"/>
           </div>
 
-          <button class="btn-decrypt" id="decryptBtn" onclick="attemptDecrypt()">
-            🔓 Decrypt &amp; Download
+          <button class="btn-decrypt" id="decryptBtn" onclick="attemptDecrypt()" disabled>
+            🔓 Verify &amp; Download
           </button>
-
-          <div class="decrypt-error" id="decryptError"></div>
+          <div class="attempts-warn" id="attemptsWarn"></div>
+          <div class="decrypt-error"   id="decryptError"></div>
           <div class="decrypt-success" id="decryptSuccess"></div>
         </div>
       </div>
@@ -550,7 +625,7 @@ body::before {
 <div class="modal-overlay" id="deleteModal">
   <div class="modal">
     <h3>🗑 Delete File</h3>
-    <p>This will permanently remove all chunks from Cloudinary and cannot be undone.</p>
+    <p>This permanently removes all chunks from Cloudinary and cannot be undone.</p>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('deleteModal')">Cancel</button>
       <button class="btn-confirm danger" onclick="confirmDelete()">Delete Permanently</button>
@@ -566,7 +641,7 @@ body::before {
     <div class="field">
       <label>New Expiry Date &amp; Time</label>
       <input type="datetime-local" id="expiryDateInput"
-             style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:7px;outline:none;"/>
+        style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 12px;border-radius:7px;outline:none;"/>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('expiryModal')">Cancel</button>
@@ -584,7 +659,7 @@ body::before {
 const API = "https://file-share-unique.onrender.com";
 const WS  = "wss://file-share-unique.onrender.com";
 
-// ── Owner Key ──
+// ── Owner Key (persisted) ──
 let OWNER_KEY = localStorage.getItem("dropshield_owner_key");
 if (!OWNER_KEY) {
   OWNER_KEY = [...crypto.getRandomValues(new Uint8Array(16))]
@@ -594,37 +669,29 @@ if (!OWNER_KEY) {
 document.getElementById("ownerKeyDisp").textContent =
   OWNER_KEY.slice(0,8) + "…" + OWNER_KEY.slice(-6);
 
-// ── Owner tokens (per-file short-lived tokens from server) ──
+// Owner tokens: fileId → ownerToken (for delete/expiry)
 const ownerTokens = JSON.parse(localStorage.getItem("dropshield_tokens") || "{}");
 function saveTokens() { localStorage.setItem("dropshield_tokens", JSON.stringify(ownerTokens)); }
 
-// ── Encryption keys stored locally (keyed by fileId) ──
+// Encryption keys: fileId → encKey (stored locally so owner sees it pre-filled on their download page)
 const encryptionKeys = JSON.parse(localStorage.getItem("dropshield_enc_keys") || "{}");
 function saveEncKeys() { localStorage.setItem("dropshield_enc_keys", JSON.stringify(encryptionKeys)); }
 
 // ═══════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════
-let allFiles   = [];
-let filterMode = "all";
+let allFiles        = [];
+let filterMode      = "all";
 let pendingDeleteId = null;
 let pendingExpiryId = null;
-
-// ── Check if we were opened via a share link ──
-// e.g. https://yoursite.com/?file=<fileId>
-function getSharedFileId() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("file") || null;
-}
 
 // ═══════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════
 (function init() {
-  const sharedId = getSharedFileId();
+  const sharedId = new URLSearchParams(window.location.search).get("file");
   if (sharedId) {
-    // Opened via share link — show decrypt page
-    switchPage('decrypt');
+    switchPage("decrypt");
     loadDecryptPage(sharedId);
   } else {
     loadFiles();
@@ -649,20 +716,40 @@ function connectWS() {
   ws.onmessage = e => {
     try {
       const msg = JSON.parse(e.data);
+
       if (msg.type === "file_ready") {
-        // Only update our local list if this file belongs to us
-        const isOurs = ownerTokens[msg.fileId] || encryptionKeys[msg.fileId];
-        if (isOurs) {
-          const idx = allFiles.findIndex(f => f.fileId === msg.fileId);
-          if (idx >= 0) allFiles[idx] = msg; else allFiles.unshift(msg);
-          renderTable(); updateStats();
-        }
+        // Only track files that belong to this session
+        if (!ownerTokens[msg.fileId] && !encryptionKeys[msg.fileId]) return;
+        const idx = allFiles.findIndex(f => f.fileId === msg.fileId);
+        if (idx >= 0) allFiles[idx] = msg; else allFiles.unshift(msg);
+        renderTable(); updateStats();
+
       } else if (msg.type === "file_deleted") {
         allFiles = allFiles.filter(f => f.fileId !== msg.fileId);
         renderTable(); updateStats();
+
       } else if (msg.type === "expiry_updated") {
         const f = allFiles.find(f => f.fileId === msg.fileId);
-        if (f) { f.expiresAt = msg.expiresAt; f.expired = msg.expiresAt < Date.now(); renderTable(); updateStats(); }
+        if (f) {
+          f.expiresAt = msg.expiresAt;
+          f.expired   = msg.expiresAt < Date.now();
+          renderTable(); updateStats();
+        }
+
+      } else if (msg.type === "download_count_updated") {
+        // Live-update download counter without re-rendering the whole table
+        const f = allFiles.find(f => f.fileId === msg.fileId);
+        if (f) {
+          f.downloadCount = msg.downloadCount;
+          const el = document.getElementById(`dl-count-${msg.fileId}`);
+          if (el) {
+            el.textContent = msg.downloadCount;
+            // flash green to signal live update
+            el.classList.remove("flash");
+            void el.offsetWidth; // force reflow
+            el.classList.add("flash");
+          }
+        }
       }
     } catch {}
   };
@@ -675,13 +762,13 @@ function switchPage(name) {
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
   document.getElementById("page-" + name).classList.add("active");
-  const navItem = document.querySelector(`.nav-item[data-page="${name}"]`);
-  if (navItem) navItem.classList.add("active");
+  const ni = document.querySelector(`.nav-item[data-page="${name}"]`);
+  if (ni) ni.classList.add("active");
   if (name === "files") loadFiles();
 }
 
 // ═══════════════════════════════════════════
-// LOAD FILES — only shows THIS owner's files
+// LOAD FILES
 // ═══════════════════════════════════════════
 async function loadFiles() {
   const btn = document.getElementById("refreshBtn");
@@ -689,36 +776,27 @@ async function loadFiles() {
   document.getElementById("fileRows").innerHTML =
     `<div class="spinner-wrap"><div class="spinner"></div></div>`;
   try {
-    const r = await fetch(`${API}/owner/files`, {
-      headers: { "x-owner-key": OWNER_KEY }
-    });
+    const r = await fetch(`${API}/owner/files`, { headers: { "x-owner-key": OWNER_KEY } });
     if (!r.ok) throw new Error("HTTP " + r.status);
     allFiles = await r.json();
-
-    // FIX: correct subtitle based on actual count
     const count = allFiles.length;
     document.getElementById("filesSubtitle").textContent =
-      count === 0
-        ? "Your vault is empty"
-        : `${count} file${count !== 1 ? "s" : ""} in your vault`;
-
-    renderTable();
-    updateStats();
+      count === 0 ? "Your vault is empty"
+                  : `${count} file${count !== 1 ? "s" : ""} in your vault`;
+    renderTable(); updateStats();
   } catch (err) {
     showToast("Failed to load files: " + err.message, "error");
     document.getElementById("filesSubtitle").textContent = "Could not load files";
     document.getElementById("fileRows").innerHTML =
       `<div class="empty-state"><div class="big-icon">⚠️</div><p>Could not reach server</p></div>`;
-  } finally {
-    btn.classList.remove("spinning");
-  }
+  } finally { btn.classList.remove("spinning"); }
 }
 
 // ═══════════════════════════════════════════
 // STATS
 // ═══════════════════════════════════════════
 function updateStats() {
-  const now = Date.now();
+  const now      = Date.now();
   const active   = allFiles.filter(f => !f.expired && f.expiresAt > now);
   const expiring = active.filter(f => (f.expiresAt - now) < 2*24*60*60*1000);
   const expired  = allFiles.filter(f => f.expired || f.expiresAt <= now);
@@ -747,13 +825,13 @@ function setFilter(f) {
 }
 
 function renderTable() {
-  const q = document.getElementById("searchInput").value.toLowerCase().trim();
+  const q   = document.getElementById("searchInput").value.toLowerCase().trim();
   const now = Date.now();
 
   let rows = allFiles.filter(f => {
     if (q && !f.name.toLowerCase().includes(q)) return false;
     if (filterMode === "active")  return !f.expired && f.expiresAt > now;
-    if (filterMode === "expired") return f.expired  || f.expiresAt <= now;
+    if (filterMode === "expired") return  f.expired || f.expiresAt <= now;
     return true;
   });
 
@@ -766,62 +844,69 @@ function renderTable() {
   container.innerHTML = rows.map((f, i) => {
     const isExpired  = f.expired || f.expiresAt <= now;
     const isExpiring = !isExpired && (f.expiresAt - now) < 2*24*60*60*1000;
-    const badgeCls = isExpired ? "badge-expired" : isExpiring ? "badge-expiring" : "badge-active";
-    const badgeTxt = isExpired ? "EXPIRED" : isExpiring ? "EXPIRING" : "ACTIVE";
-    const expiresDate = new Date(f.expiresAt).toLocaleDateString(undefined, { month:"short", day:"numeric", year:"numeric" });
-    const daysLeft = Math.max(0, Math.ceil((f.expiresAt - now) / 86400000));
-
-    // FIX: chunks count — prefer totalChunks, fallback to chunkIds length, show — if both 0/missing
+    const badgeCls   = isExpired ? "badge-expired" : isExpiring ? "badge-expiring" : "badge-active";
+    const badgeTxt   = isExpired ? "EXPIRED"       : isExpiring ? "EXPIRING"       : "ACTIVE";
+    const expiresDate = new Date(f.expiresAt).toLocaleDateString(undefined,
+      { month:"short", day:"numeric", year:"numeric" });
+    const daysLeft   = Math.max(0, Math.ceil((f.expiresAt - now) / 86400000));
     const chunkCount = f.totalChunks != null ? f.totalChunks
-                     : (f.chunkIds && f.chunkIds.length > 0) ? f.chunkIds.length
-                     : "—";
-
-    // Check owner authorization: must have ownerToken OR be the ownerKey holder
-    const hasOwnerToken = !!ownerTokens[f.fileId];
-    // We always have the ownerKey since we created via this session
+                     : (f.chunkIds && f.chunkIds.length) ? f.chunkIds.length : "—";
+    const dlCount    = f.downloadCount || 0;
 
     return `<div class="file-row" style="animation-delay:${i*30}ms">
+
       <div class="file-name-cell">
         <div class="file-icon">${fileEmoji(f.mimeType)}</div>
         <div>
           <div class="file-name">${esc(f.name)}</div>
           <div class="file-size">${fmtBytes(f.size)}</div>
+          ${f.oneTime ? `<div class="one-time-tag">💥 ONE-TIME</div>` : ""}
         </div>
       </div>
+
       <div><span class="badge ${badgeCls}">${badgeTxt}</span></div>
-      <div class="expiry-cell">
+
+      <div class="expiry-cell col-expiry">
         ${isExpired
           ? `<span style="color:var(--red)">Expired</span>`
-          : `<span class="days">${daysLeft}d</span> left<br/><span style="font-size:10px">${expiresDate}</span>`}
+          : `<span class="days">${daysLeft}d</span> left<br/>
+             <span style="font-size:10px">${expiresDate}</span>`}
       </div>
+
       <div class="chunks-cell col-chunks">${chunkCount}</div>
+
+      <div class="dl-count-cell col-dlcount">
+        ${f.oneTime
+          ? `<span style="color:var(--muted);font-size:11px;">—</span>`
+          : `<span class="dl-num" id="dl-count-${f.fileId}">${dlCount}</span>
+             <span class="dl-label">download${dlCount !== 1 ? "s" : ""}</span>`}
+      </div>
+
       <div class="action-btns">
         <button class="action-btn btn-copy" onclick="copyShareLink('${f.fileId}')">Copy Link</button>
-        ${!isExpired ? `<button class="action-btn btn-expiry" onclick="openExpiryModal('${f.fileId}', ${f.expiresAt})">Expiry</button>` : ""}
+        ${!isExpired
+          ? `<button class="action-btn btn-expiry" onclick="openExpiryModal('${f.fileId}', ${f.expiresAt})">Expiry</button>`
+          : ""}
         <button class="action-btn btn-delete" onclick="openDeleteModal('${f.fileId}')">Delete</button>
       </div>
+
     </div>`;
   }).join("");
 }
 
 // ═══════════════════════════════════════════
 // COPY SHARE LINK
-// Generates a link that includes the fileId as a query param
 // ═══════════════════════════════════════════
 function copyShareLink(fileId) {
-  // Build share URL pointing to this same page with ?file=<id>
-  const base = window.location.href.split("?")[0];
+  const base     = window.location.href.split("?")[0];
   const shareUrl = `${base}?file=${fileId}`;
   navigator.clipboard.writeText(shareUrl)
-    .then(() => showToast("Share link copied! Recipient needs the decryption key.", "success"))
-    .catch(() => {
-      // Fallback
-      showToast("Could not copy: " + shareUrl, "error");
-    });
+    .then(() => showToast("Share link copied! Send the decryption key separately.", "success"))
+    .catch(() => showToast("Copy failed — URL: " + shareUrl, "error"));
 }
 
 // ═══════════════════════════════════════════
-// DELETE — restricted to owner (ownerToken or ownerKey)
+// DELETE
 // ═══════════════════════════════════════════
 function openDeleteModal(fileId) {
   pendingDeleteId = fileId;
@@ -834,31 +919,26 @@ async function confirmDelete() {
   const fid = pendingDeleteId;
   pendingDeleteId = null;
 
-  const token = ownerTokens[fid];
   const headers = { "Content-Type": "application/json" };
-  // FIX: send ownerToken if we have it, otherwise ownerKey — BOTH are checked server-side
-  if (token) {
-    headers["x-owner-token"] = token;
-  } else {
-    headers["x-owner-key"] = OWNER_KEY;
-  }
+  if (ownerTokens[fid]) headers["x-owner-token"] = ownerTokens[fid];
+  else headers["x-owner-key"] = OWNER_KEY;
 
   try {
     const r = await fetch(`${API}/file/${fid}`, { method: "DELETE", headers });
     if (r.status === 403) throw new Error("Not authorized to delete this file");
     if (r.status === 404) throw new Error("File not found");
     if (!r.ok) throw new Error("HTTP " + r.status);
+
     allFiles = allFiles.filter(f => f.fileId !== fid);
     delete ownerTokens[fid];
     delete encryptionKeys[fid];
-    saveTokens();
-    saveEncKeys();
-    renderTable();
-    updateStats();
-    // FIX: update subtitle after delete
+    saveTokens(); saveEncKeys();
+    renderTable(); updateStats();
+
     const count = allFiles.length;
     document.getElementById("filesSubtitle").textContent =
-      count === 0 ? "Your vault is empty" : `${count} file${count !== 1 ? "s" : ""} in your vault`;
+      count === 0 ? "Your vault is empty"
+                  : `${count} file${count !== 1 ? "s" : ""} in your vault`;
     showToast("File deleted permanently", "success");
   } catch (err) {
     showToast("Delete failed: " + err.message, "error");
@@ -866,13 +946,13 @@ async function confirmDelete() {
 }
 
 // ═══════════════════════════════════════════
-// EXPIRY UPDATE — restricted to owner
+// EXPIRY
 // ═══════════════════════════════════════════
 function openExpiryModal(fileId, currentExpiry) {
   pendingExpiryId = fileId;
   const f = allFiles.find(f => f.fileId === fileId);
   document.getElementById("expiryModalSub").textContent = `File: ${f ? f.name : fileId}`;
-  const dt = new Date(currentExpiry);
+  const dt    = new Date(currentExpiry);
   const local = new Date(dt.getTime() - dt.getTimezoneOffset()*60000).toISOString().slice(0,16);
   document.getElementById("expiryDateInput").value = local;
   document.getElementById("expiryModal").classList.add("open");
@@ -889,28 +969,21 @@ async function confirmExpiry() {
   const fid = pendingExpiryId;
   pendingExpiryId = null;
 
-  const token = ownerTokens[fid];
   const headers = { "Content-Type": "application/json" };
-  // FIX: send ownerToken or ownerKey — must be authorized
-  if (token) {
-    headers["x-owner-token"] = token;
-  } else {
-    headers["x-owner-key"] = OWNER_KEY;
-  }
+  if (ownerTokens[fid]) headers["x-owner-token"] = ownerTokens[fid];
+  else headers["x-owner-key"] = OWNER_KEY;
 
   try {
     const r = await fetch(`${API}/file/${fid}/expiry`, {
-      method: "PATCH", headers,
-      body: JSON.stringify({ expiresAt: newMs })
+      method: "PATCH", headers, body: JSON.stringify({ expiresAt: newMs })
     });
-    if (r.status === 403) throw new Error("Not authorized to modify this file");
+    if (r.status === 403) throw new Error("Not authorized");
     if (r.status === 404) throw new Error("File not found");
     if (!r.ok) throw new Error("HTTP " + r.status);
     const data = await r.json();
     const f = allFiles.find(f => f.fileId === fid);
     if (f) { f.expiresAt = data.expiresAt; f.expired = data.expiresAt < Date.now(); }
-    renderTable();
-    updateStats();
+    renderTable(); updateStats();
     showToast("Expiry updated!", "success");
   } catch (err) {
     showToast("Update failed: " + err.message, "error");
@@ -924,14 +997,13 @@ document.querySelectorAll(".modal-overlay").forEach(m =>
 
 // ═══════════════════════════════════════════
 // DECRYPT / DOWNLOAD PAGE
-// Shown when user opens a share link (?file=xxx)
 // ═══════════════════════════════════════════
-let decryptFileInfo = null;
+let decryptFileInfo  = null;
+let decryptFailCount = 0;
 
 async function loadDecryptPage(fileId) {
   document.getElementById("decryptBtn").disabled = true;
   document.getElementById("decryptFileName").textContent = "Loading file info…";
-  document.getElementById("decryptFileMeta").textContent = "";
 
   try {
     const r = await fetch(`${API}/file-info/${fileId}`);
@@ -943,8 +1015,14 @@ async function loadDecryptPage(fileId) {
     document.getElementById("decryptFileName").textContent = decryptFileInfo.name;
     document.getElementById("decryptFileMeta").innerHTML =
       `<strong>${fmtBytes(decryptFileInfo.size)}</strong> &nbsp;·&nbsp; ` +
-      `${decryptFileInfo.totalChunks || (decryptFileInfo.chunkIds||[]).length} chunks &nbsp;·&nbsp; ` +
-      `Expires ${new Date(decryptFileInfo.expiresAt).toLocaleDateString(undefined, { month:"short", day:"numeric", year:"numeric" })}`;
+      `${decryptFileInfo.totalChunks || 0} chunks &nbsp;·&nbsp; ` +
+      `Expires ${new Date(decryptFileInfo.expiresAt).toLocaleDateString(undefined,
+        { month:"short", day:"numeric", year:"numeric" })}`;
+
+    // Show one-time warning
+    if (decryptFileInfo.oneTime) {
+      document.getElementById("oneTimeWarning").classList.add("show");
+    }
 
     document.getElementById("decryptInfoBlock").innerHTML = `
       <div class="info-row">
@@ -957,20 +1035,32 @@ async function loadDecryptPage(fileId) {
       </div>
       <div class="info-row">
         <span class="info-label">Chunks</span>
-        <span class="info-val">${decryptFileInfo.totalChunks || (decryptFileInfo.chunkIds||[]).length}</span>
+        <span class="info-val">${decryptFileInfo.totalChunks || 0}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Downloads</span>
+        <span class="info-val">${decryptFileInfo.oneTime ? "One-time 💥" : (decryptFileInfo.downloadCount || 0)}</span>
       </div>
       <div class="info-row">
         <span class="info-label">Expires</span>
         <span class="info-val">${new Date(decryptFileInfo.expiresAt).toLocaleString()}</span>
       </div>
     `;
+
     document.getElementById("decryptBtn").disabled = false;
+
+    // Pre-fill key if we're the owner
+    if (encryptionKeys[decryptFileInfo.fileId]) {
+      document.getElementById("decryptKeyInput").value = encryptionKeys[decryptFileInfo.fileId];
+    }
 
   } catch (err) {
     document.getElementById("decryptFileName").textContent = "File Unavailable";
     document.getElementById("decryptFileMeta").textContent = err.message;
     document.getElementById("decryptInfoBlock").innerHTML =
-      `<div style="text-align:center;padding:20px;color:var(--red);font-family:var(--mono);font-size:13px;">⚠️ ${esc(err.message)}</div>`;
+      `<div style="text-align:center;padding:20px;color:var(--red);font-family:var(--mono);font-size:13px;">
+         ⚠️ ${esc(err.message)}
+       </div>`;
   }
 }
 
@@ -978,91 +1068,90 @@ async function attemptDecrypt() {
   if (!decryptFileInfo) return;
 
   const keyInput = document.getElementById("decryptKeyInput").value.trim();
-  if (!keyInput) {
-    showDecryptError("Please enter the decryption key.");
+  if (!keyInput) { showDecryptError("Please enter the decryption key."); return; }
+
+  if (decryptFailCount >= 5) {
+    showDecryptError("Too many failed attempts. The server may block further requests. Please wait.");
     return;
   }
 
   const btn = document.getElementById("decryptBtn");
   btn.disabled = true;
-  btn.textContent = "⏳ Verifying key…";
+  btn.textContent = "⏳ Verifying with server…";
   document.getElementById("decryptError").classList.remove("show");
   document.getElementById("decryptSuccess").classList.remove("show");
+  document.getElementById("attemptsWarn").classList.remove("show");
 
   try {
-    // Verify key matches stored IV for this file (client-side key check using stored encKey)
-    // In production: key would be used to decrypt the chunks via AES-GCM
-    // Here we verify against the IV stored in file metadata using PBKDF2 or direct match
-    const storedKey = encryptionKeys[decryptFileInfo.fileId];
+    const downloadUrl =
+      `${API}/file/${encodeURIComponent(decryptFileInfo.fileId)}` +
+      `?key=${encodeURIComponent(keyInput)}`;
 
-    // If we have a stored key (we're the uploader), compare directly
-    // Otherwise, attempt to download and verify by matching against the file's IV
-    const isKeyValid = storedKey
-      ? keyInput === storedKey
-      : await verifyDecryptionKey(keyInput, decryptFileInfo.iv);
+    // HEAD request first to verify the key before triggering a file download
+    const r = await fetch(downloadUrl, { method: "HEAD" }).catch(() => null);
 
-    if (!isKeyValid) {
+    if (r && r.status === 401) {
+      decryptFailCount++;
       btn.disabled = false;
-      btn.innerHTML = "🔓 Decrypt &amp; Download";
-      showDecryptError("❌ Incorrect decryption key. Please check the key and try again.");
+      btn.innerHTML = "🔓 Verify &amp; Download";
+      if (decryptFailCount >= 3) {
+        document.getElementById("attemptsWarn").textContent =
+          `⚠ ${decryptFailCount} failed attempt${decryptFailCount > 1 ? "s" : ""}. ` +
+          `Server blocks after 10 failures in 15 minutes.`;
+        document.getElementById("attemptsWarn").classList.add("show");
+      }
+      showDecryptError("❌ Invalid decryption key. Please check and try again.");
       return;
     }
 
-    btn.textContent = "⬇️ Downloading chunks…";
-    await downloadAndDecrypt(decryptFileInfo, keyInput);
+    if (r && r.status === 429) {
+      btn.disabled = false;
+      btn.innerHTML = "🔓 Verify &amp; Download";
+      showDecryptError("🚫 Too many failed attempts from your IP. Please wait 15 minutes.");
+      return;
+    }
 
+    if (r && r.status === 410) {
+      showDecryptError("This file has expired and is no longer available.");
+      return;
+    }
+
+    if (r && r.status === 404) {
+      showDecryptError("File not found. It may have been deleted.");
+      return;
+    }
+
+    // 405 = server doesn't support HEAD — fall through to GET download
+    if (r && !r.ok && r.status !== 405) {
+      btn.disabled = false;
+      btn.innerHTML = "🔓 Verify &amp; Download";
+      showDecryptError("Server error: HTTP " + r.status);
+      return;
+    }
+
+    // Key verified (or HEAD not supported) — trigger download
+    btn.textContent = "⬇️ Downloading…";
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    a.download = decryptFileInfo.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    decryptFailCount = 0;
     document.getElementById("decryptSuccess").textContent =
-      "✓ File decrypted and downloaded successfully!";
+      decryptFileInfo.oneTime
+        ? "✓ Download started! Note: this file has now been permanently deleted from the server."
+        : "✓ Download started! Save your file.";
     document.getElementById("decryptSuccess").classList.add("show");
-    btn.textContent = "✓ Downloaded";
-    showToast("File downloaded successfully!", "success");
+    btn.innerHTML = "✓ Downloaded";
+    showToast("Download started!", "success");
 
   } catch (err) {
-    showDecryptError("Download failed: " + err.message);
     btn.disabled = false;
-    btn.innerHTML = "🔓 Decrypt &amp; Download";
+    btn.innerHTML = "🔓 Verify &amp; Download";
+    showDecryptError("Download failed: " + err.message);
   }
-}
-
-// Verify key against the stored IV via a hash check
-async function verifyDecryptionKey(key, iv) {
-  // Simple verification: derive a check hash from key+iv
-  // In production this should match whatever encryption scheme was used
-  try {
-    const enc = new TextEncoder();
-    const keyData = enc.encode(key + iv);
-    await crypto.subtle.digest("SHA-256", keyData);
-    // Since we can't truly verify without attempting decryption, we proceed
-    // The actual verification happens during decryption
-    return true; // Allow attempt; real failure shows on decrypt
-  } catch {
-    return false;
-  }
-}
-
-async function downloadAndDecrypt(fileInfo, key) {
-  // Fetch all chunks from the server
-  const chunkIds = fileInfo.chunkIds || [];
-  if (!chunkIds.length && !fileInfo.totalChunks) {
-    throw new Error("No chunk information available for this file.");
-  }
-
-  // Fetch the actual download URL from server
-  const r = await fetch(`${API}/file/${fileInfo.fileId}`);
-  if (r.status === 410) throw new Error("File has expired");
-  if (r.status === 403) throw new Error("Access denied");
-  if (!r.ok) throw new Error("HTTP " + r.status);
-
-  // Get the blob and trigger download
-  const blob = await r.blob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = fileInfo.name;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
 function showDecryptError(msg) {
@@ -1077,7 +1166,7 @@ function showDecryptError(msg) {
 let filesToUpload = [];
 
 function handleDragOver(e) { e.preventDefault(); document.getElementById("dropZone").classList.add("dragover"); }
-function handleDragLeave() { document.getElementById("dropZone").classList.remove("dragover"); }
+function handleDragLeave()  { document.getElementById("dropZone").classList.remove("dragover"); }
 function handleDrop(e) {
   e.preventDefault();
   document.getElementById("dropZone").classList.remove("dragover");
@@ -1087,13 +1176,12 @@ function handleFileSelect(e) { addFiles([...e.target.files]); }
 
 function addFiles(files) {
   files.forEach(f => {
-    if (!filesToUpload.find(x => x.file.name === f.name && x.file.size === f.size)) {
+    if (!filesToUpload.find(x => x.file.name === f.name && x.file.size === f.size))
       filesToUpload.push({ file: f, status: "pending", id: crypto.randomUUID() });
-    }
   });
   renderQueue();
   const btn = document.getElementById("uploadStartBtn");
-  btn.disabled = filesToUpload.length === 0;
+  btn.disabled  = filesToUpload.length === 0;
   btn.textContent = filesToUpload.length > 0
     ? `Upload ${filesToUpload.length} File${filesToUpload.length > 1 ? "s" : ""}`
     : "Select files first";
@@ -1101,16 +1189,16 @@ function addFiles(files) {
 
 function renderQueue() {
   document.getElementById("uploadQueue").innerHTML = filesToUpload.map(item => `
-    <div class="queue-item" id="qi-${item.id}">
+    <div class="queue-item">
       <span class="queue-icon">${fileEmoji(item.file.type)}</span>
       <div class="queue-info">
         <div class="queue-name">${esc(item.file.name)}</div>
         <div class="queue-meta">${fmtBytes(item.file.size)}</div>
       </div>
-      <span class="queue-status ${item.status}" id="qs-${item.id}">${
-        item.status === "pending"   ? "PENDING"     :
-        item.status === "uploading" ? "UPLOADING…"  :
-        item.status === "done"      ? "✓ DONE"      : "✗ FAILED"
+      <span class="queue-status ${item.status}">${
+        item.status === "pending"   ? "PENDING"    :
+        item.status === "uploading" ? "UPLOADING…" :
+        item.status === "done"      ? "✓ DONE"     : "✗ FAILED"
       }</span>
     </div>
   `).join("");
@@ -1133,66 +1221,72 @@ function getExpiryMs() {
 async function startUploads() {
   const btn = document.getElementById("uploadStartBtn");
   btn.disabled = true;
+
   const chunkSize = parseInt(document.getElementById("chunkSizeSel").value);
   const expiryMs  = getExpiryMs();
+  const isOneTime = document.getElementById("oneTimeSelect").value === "true";
 
-  // FIX: Get or generate encryption key for this batch
+  // Get or generate encryption key
   let encKey = document.getElementById("encryptionKey").value.trim();
   if (!encKey) {
     encKey = [...crypto.getRandomValues(new Uint8Array(24))]
       .map(b => b.toString(16).padStart(2,"0")).join("");
   }
 
+  // Show key reveal box immediately
+  document.getElementById("keyRevealVal").textContent = encKey;
+  document.getElementById("keyRevealBox").classList.add("show");
+
+  let anySuccess = false;
   for (const item of filesToUpload) {
     if (item.status === "done") continue;
     item.status = "uploading";
     renderQueue();
     try {
-      const fileId = await uploadFile(item.file, chunkSize, expiryMs, item.id, encKey);
+      const fileId = await uploadFile(item.file, chunkSize, expiryMs, encKey, isOneTime);
       item.status = "done";
-      // Store encryption key locally so we can share it later
+      anySuccess  = true;
       if (fileId) {
         encryptionKeys[fileId] = encKey;
         saveEncKeys();
       }
     } catch (err) {
       item.status = "fail";
-      showToast(`Upload failed: ${err.message}`, "error");
+      showToast("Upload failed: " + err.message, "error");
     }
     renderQueue();
   }
 
-  btn.disabled = false;
+  btn.disabled    = false;
   btn.textContent = "Upload Again";
 
-  // Show the generated key to the user so they can share it
-  showToast(`✓ Upload complete! Key: ${encKey.slice(0,8)}…`, "success");
-  alert(`✅ Upload complete!\n\nYour encryption key:\n${encKey}\n\nShare this key with recipients — they'll need it to download the file.`);
-
-  setTimeout(() => { switchPage("files"); }, 500);
+  if (anySuccess) {
+    showToast(isOneTime ? "Upload complete! 💥 One-time file ready." : "Upload complete!", "success");
+    setTimeout(() => switchPage("files"), 1500);
+  }
 }
 
-// Returns the fileId on success
-async function uploadFile(file, chunkSize, expiryMs, queueId, encKey) {
+// Returns fileId on success
+async function uploadFile(file, chunkSize, expiryMs, encKey, isOneTime) {
   const fileId = [...crypto.getRandomValues(new Uint8Array(16))]
     .map(b => b.toString(16).padStart(2,"0")).join("");
 
-  // Derive IV from the encryption key (in production: use AES-GCM with this IV)
-  const enc = new TextEncoder();
+  // Derive IV: SHA-256(encKey)[0..12 bytes as hex] — must match server's deriveIvFromKey()
+  const enc     = new TextEncoder();
   const keyHash = await crypto.subtle.digest("SHA-256", enc.encode(encKey));
-  const iv = [...new Uint8Array(keyHash)].slice(0,12).map(b=>b.toString(16).padStart(2,"0")).join("");
+  const iv      = [...new Uint8Array(keyHash)].slice(0, 12)
+    .map(b => b.toString(16).padStart(2,"0")).join("");
 
   const totalChunks = Math.ceil(file.size / chunkSize);
-  const chunkIds = [];
+  const chunkIds    = [];
   const wrap = document.getElementById("uploadProgressWrap");
   const bar  = document.getElementById("progressBar");
   const lbl  = document.getElementById("progressLabel");
   wrap.classList.add("active");
 
   for (let i = 0; i < totalChunks; i++) {
-    const start = i * chunkSize;
-    const blob  = file.slice(start, start + chunkSize);
-    const fd = new FormData();
+    const blob = file.slice(i * chunkSize, (i + 1) * chunkSize);
+    const fd   = new FormData();
     fd.append("chunk", blob, `chunk_${i}.enc`);
 
     const r = await fetch(`${API}/upload/chunk-single`, {
@@ -1204,9 +1298,9 @@ async function uploadFile(file, chunkSize, expiryMs, queueId, encKey) {
     const data = await r.json();
     chunkIds.push(data.chunkId);
 
-    const pct = Math.round(((i+1)/totalChunks)*100);
+    const pct = Math.round(((i + 1) / totalChunks) * 100);
     bar.style.width = pct + "%";
-    lbl.textContent = `Uploading chunk ${i+1}/${totalChunks} (${pct}%)`;
+    lbl.textContent = `Uploading chunk ${i + 1}/${totalChunks} (${pct}%)`;
   }
 
   lbl.textContent = "Finalizing…";
@@ -1217,19 +1311,19 @@ async function uploadFile(file, chunkSize, expiryMs, queueId, encKey) {
       fileId,
       fileName: file.name,
       mimeType: file.type || "application/octet-stream",
-      size: file.size,
+      size:     file.size,
       chunkIds,
       iv,
       ownerKey: OWNER_KEY,
       expiryMs,
+      oneTime:  isOneTime,
     }),
   });
   if (!fr.ok) throw new Error("Finalize failed: HTTP " + fr.status);
   const finalized = await fr.json();
 
-  // FIX: Store the ownerToken returned by server for future delete/expiry ops
   if (finalized.ownerToken) {
-    ownerTokens[finalized.fileId] = finalized.ownerToken;
+    ownerTokens[finalized.fileId || fileId] = finalized.ownerToken;
     saveTokens();
   }
 
@@ -1240,6 +1334,14 @@ async function uploadFile(file, chunkSize, expiryMs, queueId, encKey) {
   return finalized.fileId || fileId;
 }
 
+function copyKeyToClipboard() {
+  const key = document.getElementById("keyRevealVal").textContent;
+  if (!key) return;
+  navigator.clipboard.writeText(key)
+    .then(() => showToast("Decryption key copied!", "success"))
+    .catch(() => showToast("Copy failed", "error"));
+}
+
 // ═══════════════════════════════════════════
 // UTILS
 // ═══════════════════════════════════════════
@@ -1247,9 +1349,9 @@ function fmtBytes(b) {
   if (!b && b !== 0) return "—";
   if (b === 0) return "0 B";
   if (b < 1024) return b + " B";
-  if (b < 1048576) return (b/1024).toFixed(1) + " KB";
-  if (b < 1073741824) return (b/1048576).toFixed(1) + " MB";
-  return (b/1073741824).toFixed(2) + " GB";
+  if (b < 1048576) return (b / 1024).toFixed(1) + " KB";
+  if (b < 1073741824) return (b / 1048576).toFixed(1) + " MB";
+  return (b / 1073741824).toFixed(2) + " GB";
 }
 function esc(s) {
   return String(s)
